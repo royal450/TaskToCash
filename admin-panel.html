@@ -391,11 +391,23 @@
           Object.entries(tasks).forEach(([id, task]) => {
             const statusBadge = task.active !== false ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>';
             const thumbnail = task.thumbnail || `https://source.unsplash.com/featured/400x300/?${task.category || 'business'}`;
+            const categoryConfigs = {
+              'Google Maps': { image: 'https://source.unsplash.com/800x600/?maps,location,navigation', color: '#4285F4' },
+              'Google Reviews': { image: 'https://source.unsplash.com/800x600/?review,rating,stars', color: '#FBBC04' },
+              'Social Media': { image: 'https://source.unsplash.com/800x600/?social,media,phone', color: '#4267B2' },
+              'App Promotion': { image: 'https://source.unsplash.com/800x600/?mobile,app,smartphone', color: '#34A853' },
+              'Website Review': { image: 'https://source.unsplash.com/800x600/?website,computer,laptop', color: '#667eea' },
+              'Survey': { image: 'https://source.unsplash.com/800x600/?survey,form,feedback', color: '#f5576c' },
+              'Other': { image: 'https://source.unsplash.com/800x600/?task,work,business', color: '#764ba2' }
+            };
+            const categoryConfig = categoryConfigs[task.category] || categoryConfigs['Other'];
+            const thumbnailUrl = task.thumbnail || categoryConfig.image;
+            
             html += `
               <div class="col-md-6 col-lg-4">
                 <div class="card modern-admin-card" style="border: none; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: 2px solid ${task.active !== false ? 'rgba(102, 126, 234, 0.2)' : 'rgba(204, 204, 204, 0.3)'}; min-height: 300px; display: flex; flex-direction: column;">
                   <div style="position: relative; flex-shrink: 0;">
-                    <img src="${thumbnail}" alt="${task.title}" style="width: 100%; height: 160px; object-fit: cover;">
+                    <img src="${thumbnailUrl}" alt="${task.title}" onerror="this.src='${categoryConfig.image}'" style="width: 100%; height: 160px; object-fit: cover;">
                     <div style="position: absolute; top: 10px; right: 10px;">
                       ${statusBadge}
                     </div>
@@ -408,7 +420,7 @@
                       <h6 style="font-weight: 700; margin: 0 0 8px 0; color: #2c3e50; font-size: 1.1rem;">${task.title || 'Task'}</h6>
                       <p style="font-size: 0.85rem; color: #7f8c8d; margin: 0 0 10px 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${task.description || 'No description'}</p>
                       <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <span style="font-size: 0.75rem; background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 4px 10px; border-radius: 12px; font-weight: 600;">
+                        <span style="font-size: 0.75rem; background: ${categoryConfig.color}15; color: ${categoryConfig.color}; padding: 4px 10px; border-radius: 12px; font-weight: 600;">
                           <i class="bi bi-tag-fill"></i> ${task.category || 'General'}
                         </span>
                         <span style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 4px 10px; border-radius: 12px; font-weight: 600;">
