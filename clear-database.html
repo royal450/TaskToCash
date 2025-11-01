@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clear Database - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow-lg" style="border: none; border-radius: 20px;">
+          <div class="card-body p-5 text-center">
+            <div class="mb-4">
+              <i class="bi bi-database-fill-x" style="font-size: 5rem; color: #dc3545;"></i>
+            </div>
+            <h2 style="color: #333; font-weight: 700; margin-bottom: 10px;">Clear All Database</h2>
+            <p class="text-muted mb-4">This will permanently delete all data from Firebase Realtime Database</p>
+            
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-triangle-fill"></i> <strong>Warning!</strong><br>
+              This action cannot be undone. All users, tasks, withdrawals, and admin tasks will be deleted.
+            </div>
+
+            <div id="progressSection" style="display: none;">
+              <div class="progress mb-3" style="height: 30px;">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width: 0%"></div>
+              </div>
+              <p id="statusText" class="text-muted">Preparing...</p>
+            </div>
+
+            <button onclick="clearAllDatabase()" id="clearBtn" class="btn btn-danger btn-lg w-100 mb-3" style="border-radius: 10px; padding: 15px; font-weight: 600;">
+              <i class="bi bi-trash3-fill"></i> DELETE ALL DATA
+            </button>
+            
+            <button onclick="window.location.href='admin-panel.html'" class="btn btn-outline-secondary w-100" style="border-radius: 10px; padding: 12px;">
+              <i class="bi bi-arrow-left"></i> Back to Admin Panel
+            </button>
+
+            <div id="resultSection" style="display: none; margin-top: 20px;">
+              <div class="alert alert-success" role="alert">
+                <i class="bi bi-check-circle-fill"></i> <strong>Success!</strong><br>
+                Database has been cleared successfully.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="script.js"></script>
+  <script>
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        Swal.fire({
+          title: '<i class="bi bi-shield-lock-fill"></i> Admin Login',
+          input: 'password',
+          inputLabel: 'Enter Admin Password',
+          inputPlaceholder: 'Password',
+          showCancelButton: true,
+          confirmButtonText: 'Login',
+          cancelButtonText: 'Cancel',
+          confirmButtonColor: '#dc3545',
+          cancelButtonColor: '#6c757d'
+        }).then((result) => {
+          if (result.isConfirmed && result.value === 'admin123') {
+            firebase.auth().signInAnonymously();
+          } else {
+            window.location.href = 'index.html';
+          }
+        });
+      }
+    });
+
+    async function clearAllDatabase() {
+      const result = await Swal.fire({
+        title: 'Are You Absolutely Sure?',
+        html: '<strong>This will DELETE ALL:</strong><br>- All Users<br>- All Tasks<br>- All Withdrawals<br>- All Admin Tasks<br><br>Type <strong>DELETE</strong> to confirm',
+        input: 'text',
+        inputPlaceholder: 'Type DELETE',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Delete Everything',
+        cancelButtonText: 'Cancel',
+        inputValidator: (value) => {
+          if (value !== 'DELETE') {
+            return 'You need to type DELETE to confirm';
+          }
+        }
+      });
+
+      if (!result.isConfirmed) return;
+
+      document.getElementById('clearBtn').disabled = true;
+      document.getElementById('progressSection').style.display = 'block';
+      
+      const dbPaths = ['users', 'tasks', 'withdrawals', 'adminTasks'];
+      let progress = 0;
+      const progressPerPath = 100 / dbPaths.length;
+
+      try {
+        for (let i = 0; i < dbPaths.length; i++) {
+          const path = dbPaths[i];
+          document.getElementById('statusText').textContent = `Deleting ${path}...`;
+          
+          await firebase.database().ref(path).remove();
+          
+          progress += progressPerPath;
+          document.getElementById('progressBar').style.width = progress + '%';
+          document.getElementById('progressBar').textContent = Math.round(progress) + '%';
+          
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        document.getElementById('progressBar').classList.remove('bg-danger');
+        document.getElementById('progressBar').classList.add('bg-success');
+        document.getElementById('statusText').textContent = 'Completed!';
+        document.getElementById('resultSection').style.display = 'block';
+
+        sendTelegramNotification(`🗑️ <b>DATABASE CLEARED</b>\n\n⚠️ All data has been deleted from Firebase\n📅 ${new Date().toLocaleString('en-IN')}`);
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Database Cleared!',
+          text: 'All data has been successfully deleted',
+          confirmButtonColor: '#11998e'
+        });
+
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          html: `Failed to clear database:<br><strong>${error.message}</strong><br><br>If database is in read-only mode, you need to:<br>1. Go to Firebase Console<br>2. Delete data manually<br>3. Or upgrade your Firebase plan`,
+          confirmButtonColor: '#dc3545'
+        });
+        document.getElementById('clearBtn').disabled = false;
+        document.getElementById('progressSection').style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Daily Campaign King</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body style="background: #f5f7fa; margin: 0; padding: 0;">
+  <nav class="navbar navbar-dark" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); margin: 0; padding: 15px;">
+    <div class="container-fluid" style="padding: 0 10px;">
+      <span class="navbar-brand mb-0 h1"><i class="bi bi-shield-lock-fill"></i> Admin Dashboard</span>
+      <button onclick="logoutAdmin()" class="btn btn-light btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</button>
+    </div>
+  </nav>
+
+  <div class="container-fluid" style="padding: 15px 10px; max-width: 100%;">
+    <ul class="nav nav-pills mb-3" style="background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tasks"><i class="bi bi-clipboard-check"></i> Tasks</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#withdrawals"><i class="bi bi-wallet2"></i> Withdrawals</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#users"><i class="bi bi-people"></i> Users</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#manage-tasks"><i class="bi bi-gear"></i> Manage</button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Task Approvals Tab -->
+      <div class="tab-pane fade show active" id="tasks">
+        <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px;">
+          <div class="card-body" style="padding: 20px;">
+            <h5 style="color: #667eea; font-weight: 600; margin-bottom: 15px;"><i class="bi bi-clipboard-check"></i> Pending Task Approvals</h5>
+            <div id="tasksTable">
+              <p class="text-center text-muted">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Withdrawal Requests Tab -->
+      <div class="tab-pane fade" id="withdrawals">
+        <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px;">
+          <div class="card-body" style="padding: 20px;">
+            <h5 style="color: #11998e; font-weight: 600; margin-bottom: 15px;"><i class="bi bi-wallet2"></i> Pending Withdrawal Requests</h5>
+            <div id="withdrawalsTable">
+              <p class="text-center text-muted">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Tab -->
+      <div class="tab-pane fade" id="users">
+        <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px;">
+          <div class="card-body" style="padding: 20px;">
+            <h5 style="color: #f5576c; font-weight: 600; margin-bottom: 15px;"><i class="bi bi-people-fill"></i> All Users</h5>
+            <div id="usersTable" class="table-responsive">
+              <p class="text-center text-muted">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manage Tasks Tab -->
+      <div class="tab-pane fade" id="manage-tasks">
+        <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px;">
+          <div class="card-body" style="padding: 20px;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 style="color: #667eea; font-weight: 600; margin: 0;"><i class="bi bi-list-task"></i> Manage Tasks</h5>
+              <button onclick="showAddTaskForm()" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle"></i> Add New Task</button>
+            </div>
+
+            <div id="addTaskForm" style="display: none; margin-bottom: 20px;">
+              <div class="card" style="border: 2px solid #667eea; border-radius: 10px;">
+                <div class="card-body">
+                  <h6 style="color: #667eea; font-weight: 600; margin-bottom: 15px;">Add New Task - Full Control</h6>
+
+                  <div class="row">
+                    <div class="col-md-8">
+                      <div class="mb-3">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Task Title *</label>
+                        <input type="text" id="newTaskTitle" class="form-control" placeholder="e.g., Google Maps Review">
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="mb-3">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Campaign Type *</label>
+                        <select id="newTaskCategory" class="form-select">
+                          <option value="Google Maps">Google Maps Review</option>
+                          <option value="Google Reviews">Google Reviews</option>
+                          <option value="Social Media">Social Media</option>
+                          <option value="App Promotion">App Promotion</option>
+                          <option value="Website Review">Website Review</option>
+                          <option value="Survey">Survey</option>
+                          <option value="Other">Custom / Other</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Description</label>
+                    <input type="text" id="newTaskDesc" class="form-control" placeholder="e.g., Post a review on Google Maps">
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Price (₹) *</label>
+                        <input type="number" id="newTaskPrice" class="form-control" placeholder="e.g., 5" value="2" min="1">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Thumbnail URL (Optional)</label>
+                        <input type="url" id="newTaskThumbnail" class="form-control" placeholder="https://... or leave empty for auto">
+                        <small class="text-muted">Leave empty to auto-fetch from Unsplash</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Task Link *</label>
+                    <input type="url" id="newTaskLink" class="form-control" placeholder="https://maps.app.goo.gl/... or any URL">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Step-by-Step Instructions (One per line)</label>
+                    <textarea id="newTaskSteps" class="form-control" rows="4" placeholder="Copy the comment&#10;Click on Visit Link&#10;Post the review&#10;Take screenshot"></textarea>
+                    <small class="text-muted">Each line becomes a numbered step for users</small>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Review Comments (One per line) *</label>
+                    <textarea id="newTaskComments" class="form-control" rows="5" placeholder="Enter multiple comments, one per line&#10;Users will get a random comment from these"></textarea>
+                    <small class="text-muted">Each line will be a separate comment option</small>
+                  </div>
+
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button onclick="hideAddTaskForm()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="addNewTask()" class="btn btn-success"><i class="bi bi-check-circle"></i> Create Task</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="allTasksList">
+              <p class="text-center text-muted">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="screenshotModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-image"></i> Screenshot Preview</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img id="modalScreenshot" src="" class="img-fluid" style="max-height: 80vh; border-radius: 10px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="script.js"></script>
+  <script>
+    const screenshotModal = new bootstrap.Modal(document.getElementById('screenshotModal'));
+
+    // SweetAlert2 Toast Configuration
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    });
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        loadAllData();
+      } else {
+        Swal.fire({
+          title: '<i class="bi bi-shield-lock-fill"></i> Admin Login',
+          input: 'password',
+          inputLabel: 'Enter Admin Password',
+          inputPlaceholder: 'Password',
+          showCancelButton: true,
+          confirmButtonText: '<i class="bi bi-unlock-fill"></i> Login',
+          cancelButtonText: '<i class="bi bi-x-circle"></i> Cancel',
+          confirmButtonColor: '#667eea',
+          cancelButtonColor: '#dc3545',
+          background: '#fff',
+          backdrop: 'rgba(102, 126, 234, 0.4)',
+          showClass: {
+            popup: 'animate__animated animate__fadeInDown'
+          },
+          hideClass: {
+            popup: 'animate__animated animate__fadeOutUp'
+          },
+          customClass: {
+            popup: 'border-radius-15',
+            confirmButton: 'btn-modern',
+            cancelButton: 'btn-modern'
+          }
+        }).then((result) => {
+          if (result.isConfirmed && result.value === 'admin123') {
+            firebase.auth().signInAnonymously();
+            Toast.fire({
+              icon: 'success',
+              title: 'Logged in successfully!'
+            });
+          } else if (result.dismiss === Swal.DismissReason.cancel) {
+            window.location.href = 'index.html';
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Access Denied',
+              text: 'Incorrect password',
+              confirmButtonColor: '#dc3545',
+              showClass: {
+                popup: 'animate__animated animate__shakeX'
+              }
+            }).then(() => {
+              window.location.href = 'index.html';
+            });
+          }
+        });
+      }
+    });
+
+    function loadAllData() {
+      loadTasks();
+      loadWithdrawals();
+      loadUsers();
+      loadAllTasks();
+    }
+
+    function showScreenshot(url) {
+      document.getElementById('modalScreenshot').src = url;
+      screenshotModal.show();
+    }
+
+    function showAddTaskForm() {
+      document.getElementById('addTaskForm').style.display = 'block';
+    }
+
+    function hideAddTaskForm() {
+      document.getElementById('addTaskForm').style.display = 'none';
+    }
+
+    async function fetchUnsplashImage(category) {
+      const categoryKeywords = {
+        'google-maps': 'map location pin',
+        'social-media': 'social media phone',
+        'website-review': 'computer website review',
+        'survey': 'survey feedback form',
+        'other': 'task checklist'
+      };
+
+      const query = categoryKeywords[category] || 'business task';
+
+      try {
+        const response = await fetch(`https://source.unsplash.com/featured/800x600/?${encodeURIComponent(query)}`);
+        return response.url;
+      } catch (error) {
+        console.error('Unsplash fetch error:', error);
+        return `https://source.unsplash.com/featured/800x600/?business`;
+      }
+    }
+
+    async function addNewTask() {
+      const title = document.getElementById('newTaskTitle').value.trim();
+      const description = document.getElementById('newTaskDesc').value.trim();
+      const category = document.getElementById('newTaskCategory').value;
+      const price = parseInt(document.getElementById('newTaskPrice').value);
+      let thumbnail = document.getElementById('newTaskThumbnail').value.trim();
+      const link = document.getElementById('newTaskLink').value.trim();
+      const stepsText = document.getElementById('newTaskSteps').value.trim();
+      const commentsText = document.getElementById('newTaskComments').value.trim();
+
+      if (!title || !price || !link || !commentsText) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Missing Required Fields',
+          text: 'Please fill Title, Price, Link, and Comments'
+        });
+        return;
+      }
+
+      const comments = commentsText.split('\n').filter(c => c.trim() !== '');
+      const steps = stepsText ? stepsText.split('\n').filter(s => s.trim() !== '') : [];
+
+      if (comments.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'No Comments',
+          text: 'Please add at least one comment'
+        });
+        return;
+      }
+
+      Swal.fire({
+        title: 'Creating Task...',
+        html: thumbnail ? 'Saving task...' : 'Fetching thumbnail from Unsplash...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      try {
+        if (!thumbnail) {
+          thumbnail = await fetchUnsplashImage(category);
+        }
+
+        const taskRef = firebase.database().ref('adminTasks').push();
+        await taskRef.set({
+          title: title,
+          description: description || '',
+          category: category,
+          price: price,
+          thumbnail: thumbnail,
+          link: link,
+          steps: steps,
+          comments: comments,
+          active: true,
+          createdAt: Date.now()
+        });
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Task Created!',
+          text: 'New task has been added successfully',
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        document.getElementById('newTaskTitle').value = '';
+        document.getElementById('newTaskDesc').value = '';
+        document.getElementById('newTaskCategory').value = 'google-maps';
+        document.getElementById('newTaskPrice').value = '2';
+        document.getElementById('newTaskThumbnail').value = '';
+        document.getElementById('newTaskLink').value = '';
+        document.getElementById('newTaskSteps').value = '';
+        document.getElementById('newTaskComments').value = '';
+        hideAddTaskForm();
+        loadAllTasks();
+
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message
+        });
+      }
+    }
+
+    function loadAllTasks() {
+      firebase.database().ref('adminTasks').on('value', (snapshot) => {
+        const tasks = snapshot.val();
+        let html = '';
+
+        if (!tasks) {
+          html = '<p class="text-center text-muted">No tasks created yet. Click "Add New Task" to create one.</p>';
+        } else {
+          html = '<div class="row g-3">';
+          Object.entries(tasks).forEach(([id, task]) => {
+            const statusBadge = task.active !== false ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>';
+            const thumbnail = task.thumbnail || `https://source.unsplash.com/featured/400x300/?${task.category || 'business'}`;
+            html += `
+              <div class="col-md-6 col-lg-4">
+                <div class="card modern-admin-card" style="border: none; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: 2px solid ${task.active !== false ? 'rgba(102, 126, 234, 0.2)' : 'rgba(204, 204, 204, 0.3)'}; min-height: 300px; display: flex; flex-direction: column;">
+                  <div style="position: relative; flex-shrink: 0;">
+                    <img src="${thumbnail}" alt="${task.title}" style="width: 100%; height: 160px; object-fit: cover;">
+                    <div style="position: absolute; top: 10px; right: 10px;">
+                      ${statusBadge}
+                    </div>
+                    <div style="position: absolute; bottom: 10px; left: 10px; background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%); color: white; padding: 8px 16px; border-radius: 25px; font-weight: 800; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); animation: pulse 2s infinite;">
+                      ₹${task.price || 2}
+                    </div>
+                  </div>
+                  <div class="card-body" style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
+                    <div style="flex: 1;">
+                      <h6 style="font-weight: 700; margin: 0 0 8px 0; color: #2c3e50; font-size: 1.1rem;">${task.title || 'Task'}</h6>
+                      <p style="font-size: 0.85rem; color: #7f8c8d; margin: 0 0 10px 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${task.description || 'No description'}</p>
+                      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <span style="font-size: 0.75rem; background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 4px 10px; border-radius: 12px; font-weight: 600;">
+                          <i class="bi bi-tag-fill"></i> ${task.category || 'General'}
+                        </span>
+                        <span style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 4px 10px; border-radius: 12px; font-weight: 600;">
+                          <i class="bi bi-chat-left-text-fill"></i> ${(task.comments || []).length} comments
+                        </span>
+                      </div>
+                    </div>
+                    <div class="d-flex gap-2" style="margin-top: auto;">
+                      <button onclick="toggleTaskStatus('${id}', ${task.active !== false})" class="btn btn-sm flex-fill" style="background: ${task.active !== false ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)'}; color: white; border: none; border-radius: 12px; font-weight: 600; padding: 10px;">
+                        <i class="bi bi-${task.active !== false ? 'pause' : 'play'}-circle-fill"></i> ${task.active !== false ? 'Pause' : 'Activate'}
+                      </button>
+                      <button onclick="deleteTask('${id}')" class="btn btn-sm" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 12px; font-weight: 600; padding: 10px 15px;">
+                        <i class="bi bi-trash-fill"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+        }
+
+        document.getElementById('allTasksList').innerHTML = html;
+      });
+    }
+
+    async function toggleTaskStatus(taskId, currentStatus) {
+      try {
+        await firebase.database().ref('adminTasks/' + taskId).update({
+          active: !currentStatus
+        });
+
+        Swal.fire({
+          icon: 'success',
+          title: currentStatus ? 'Task Deactivated' : 'Task Activated',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message
+        });
+      }
+    }
+
+    async function deleteTask(taskId) {
+      const result = await Swal.fire({
+        title: 'Delete Task?',
+        text: 'This action cannot be undone',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Delete'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await firebase.database().ref('adminTasks/' + taskId).remove();
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Task Deleted',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message
+          });
+        }
+      }
+    }
+
+    function loadUsers() {
+      firebase.database().ref('users').on('value', (snapshot) => {
+        const users = snapshot.val();
+        let html = '';
+
+        if (!users || Object.keys(users).length === 0) {
+          html = '<div class="alert alert-info text-center"><i class="bi bi-info-circle"></i> No users registered yet</div>';
+        } else {
+          html = '<div class="row g-3">';
+          Object.entries(users).forEach(([id, user]) => {
+          const date = new Date(user.joinedAt || Date.now()).toLocaleDateString('en-IN');
+            const isBlocked = user.blocked === true;
+            const statusBadge = isBlocked ? '<span class="badge bg-danger">Blocked</span>' : '<span class="badge bg-success">Active</span>';
+
+            html += `
+              <div class="col-md-6 col-lg-4">
+                <div class="card" style="border: none; border-radius: 12px; border-left: 4px solid ${isBlocked ? '#dc3545' : '#11998e'}; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                  <div class="card-body" style="padding: 15px;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <h6 style="font-weight: 600; margin: 0; font-size: 0.9rem;">${user.email || 'Unknown'}</h6>
+                      ${statusBadge}
+                    </div>
+                    <div class="mb-2">
+                      <small class="text-muted">Balance:</small> <strong style="color: #11998e;">₹${user.balance || 0}</strong><br>
+                      <small class="text-muted">Referrals:</small> <strong>${user.totalReferrals || 0}</strong><br>
+                      <small class="text-muted">UPI:</small> ${user.upiId || '<span class="text-muted">Not linked</span>'}<br>
+                      <small class="text-muted">Joined:</small> ${date}
+                    </div>
+                    <div class="d-grid gap-2">
+                      <button onclick="${isBlocked ? `unblockUser('${id}', '${user.email}')` : `blockUser('${id}', '${user.email}')`}" class="btn btn-sm ${isBlocked ? 'btn-success' : 'btn-danger'}">
+                        <i class="bi bi-${isBlocked ? 'unlock' : 'lock'}-fill"></i> ${isBlocked ? 'Unblock' : 'Block'} User
+                      </button>
+                      <button onclick="adjustBalance('${id}', '${user.email}', ${user.balance || 0})" class="btn btn-sm btn-warning">
+                        <i class="bi bi-cash-coin"></i> Adjust Balance
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+        }
+
+        document.getElementById('usersTable').innerHTML = html;
+      });
+    }
+
+    async function blockUser(userId, userEmail) {
+      const result = await Swal.fire({
+        title: 'Block User?',
+        html: `Block <strong>${userEmail}</strong> from accessing the platform?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Block'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await firebase.database().ref('users/' + userId).update({ blocked: true });
+
+          Swal.fire({
+            icon: 'success',
+            title: 'User Blocked',
+            text: `${userEmail} has been blocked`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message
+          });
+        }
+      }
+    }
+
+    async function unblockUser(userId, userEmail) {
+      const result = await Swal.fire({
+        title: 'Unblock User?',
+        html: `Unblock <strong>${userEmail}</strong>?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#11998e',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Unblock'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await firebase.database().ref('users/' + userId).update({ blocked: false });
+
+          Swal.fire({
+            icon: 'success',
+            title: 'User Unblocked',
+            text: `${userEmail} has been unblocked`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message
+          });
+        }
+      }
+    }
+
+    async function adjustBalance(userId, userEmail, currentBalance) {
+      const { value: action } = await Swal.fire({
+        title: 'Adjust User Balance',
+        html: `Current balance for <strong>${userEmail}</strong>: ₹${currentBalance}`,
+        input: 'select',
+        inputOptions: {
+          'add': 'Add Money',
+          'subtract': 'Subtract Money',
+          'set': 'Set New Balance'
+        },
+        inputPlaceholder: 'Select action',
+        showCancelButton: true,
+        confirmButtonText: 'Next',
+        confirmButtonColor: '#11998e'
+      });
+
+      if (!action) return;
+
+      const { value: amount } = await Swal.fire({
+        title: action === 'set' ? 'Set Balance' : (action === 'add' ? 'Add Money' : 'Subtract Money'),
+        html: `Current balance: ₹${currentBalance}`,
+        input: 'number',
+        inputLabel: 'Enter amount',
+        inputPlaceholder: 'Enter amount',
+        inputValue: action === 'set' ? currentBalance : 0,
+        showCancelButton: true,
+        confirmButtonText: 'Update Balance',
+        confirmButtonColor: '#11998e',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'Please enter an amount';
+          }
+        }
+      });
+
+      if (amount !== undefined && amount !== null && amount !== '') {
+        try {
+          let newBalance;
+          const amountNum = parseFloat(amount);
+
+          if (isNaN(amountNum) || amountNum < 0) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Invalid Amount',
+              text: 'Please enter a valid positive number'
+            });
+            return;
+          }
+
+          if (action === 'set') {
+            newBalance = amountNum;
+          } else if (action === 'add') {
+            newBalance = currentBalance + amountNum;
+          } else {
+            newBalance = currentBalance - amountNum;
+          }
+
+          if (newBalance < 0) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Invalid Operation',
+              text: 'Balance cannot be negative. User has only ₹' + currentBalance
+            });
+            return;
+          }
+
+          const updates = {
+            balance: newBalance
+          };
+
+          // Also update task earnings if adding money
+          if (action === 'add') {
+            const userSnapshot = await firebase.database().ref('users/' + userId).once('value');
+            const userData = userSnapshot.val();
+            updates.taskEarnings = (userData.taskEarnings || 0) + amountNum;
+          }
+
+          await firebase.database().ref('users/' + userId).update(updates);
+
+          sendTelegramNotification(`💰 <b>Balance Adjusted by Admin</b>\n\n👤 User: ${userEmail}\n📊 Action: ${action.toUpperCase()}\n💵 Amount: ₹${amountNum}\n💳 Old Balance: ₹${currentBalance}\n💳 New Balance: ₹${newBalance}\n⏰ Time: ${new Date().toLocaleString('en-IN')}`);
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Balance Updated Successfully!',
+            html: `<strong>${userEmail}</strong>'s balance updated from ₹${currentBalance} to ₹${newBalance}`,
+            timer: 3000,
+            showConfirmButton: false
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message
+          });
+        }
+      }
+    }
+
+    function loadTasks() {
+      firebase.database().ref('tasks').orderByChild('status').equalTo('pending').on('value', (snapshot) => {
+        const tasks = snapshot.val();
+        let html = '';
+
+        if (!tasks) {
+          html = '<div class="alert alert-info text-center"><i class="bi bi-check-circle"></i> No pending tasks</div>';
+        } else {
+          html = '<div class="row g-3">';
+          Object.entries(tasks).forEach(([id, task]) => {
+            const date = new Date(task.submittedAt).toLocaleString('en-IN');
+            html += `
+              <div class="col-md-6 col-lg-4">
+                <div class="card" style="border: none; border-radius: 12px; border-left: 4px solid #667eea; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                  <div class="card-body" style="padding: 15px;">
+                    <h6 style="color: #667eea; font-weight: 600;">${task.taskTitle || 'Task'}</h6>
+                    <p style="font-size: 0.85rem; margin: 5px 0;"><strong>User:</strong> ${task.userEmail}</p>
+                    <p style="font-size: 0.85rem; margin: 5px 0;"><strong>Price:</strong> ₹${task.taskPrice || 2}</p>
+                    <p style="font-size: 0.8rem; color: #999; margin: 5px 0;">${date}</p>
+                    <img src="${task.screenshotUrl}" class="img-fluid my-2" onclick="showScreenshot('${task.screenshotUrl}')" style="border-radius: 8px; cursor: pointer; max-height: 150px; width: 100%; object-fit: cover;">
+                    <div class="d-grid gap-2">
+                      <button onclick="approveTask('${id}', '${task.userId}', '${task.userEmail}', ${task.taskPrice || 2}, '${task.taskTitle || 'Task'}')" class="btn btn-success btn-sm">
+                        <i class="bi bi-check-circle"></i> Approve
+                      </button>
+                      <button onclick="rejectTask('${id}', '${task.userEmail}')" class="btn btn-danger btn-sm">
+                        <i class="bi bi-x-circle"></i> Reject
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+        }
+
+        document.getElementById('tasksTable').innerHTML = html;
+      });
+    }
+
+    function loadWithdrawals() {
+      firebase.database().ref('withdrawals').orderByChild('status').equalTo('pending').on('value', (snapshot) => {
+        const withdrawals = snapshot.val();
+        let html = '';
+
+        if (!withdrawals) {
+          html = '<div class="alert alert-info text-center"><i class="bi bi-check-circle"></i> No pending withdrawals</div>';
+        } else {
+          html = '<div class="row g-3">';
+          Object.entries(withdrawals).forEach(([id, wd]) => {
+            const date = new Date(wd.requestedAt).toLocaleString('en-IN');
+            html += `
+              <div class="col-md-6 col-lg-4">
+                <div class="card" style="border: none; border-radius: 12px; border-left: 4px solid #11998e; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                  <div class="card-body" style="padding: 15px;">
+                    <h3 style="color: #11998e; font-weight: 700; margin-bottom: 10px;">₹${wd.amount}</h3>
+                    <p style="font-size: 0.85rem; margin: 5px 0;"><strong>User:</strong> ${wd.userEmail}</p>
+                    <p style="font-size: 0.85rem; margin: 5px 0;"><strong>UPI:</strong> <code>${wd.upiId}</code></p>
+                    <p style="font-size: 0.8rem; color: #999; margin: 5px 0;">${date}</p>
+                    <div class="alert alert-warning mt-2 mb-2" style="font-size: 0.8rem; padding: 8px;">
+                      <i class="bi bi-info-circle"></i> Send payment via UPI before approving
+                    </div>
+                    <div class="d-grid gap-2">
+                      <button onclick="approveWithdrawal('${id}', '${wd.userId}', ${wd.amount}, '${wd.userEmail}')" class="btn btn-success btn-sm">
+                        <i class="bi bi-check-circle"></i> Paid
+                      </button>
+                      <button onclick="rejectWithdrawal('${id}', '${wd.userEmail}', ${wd.amount})" class="btn btn-danger btn-sm">
+                        <i class="bi bi-x-circle"></i> Reject
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+        }
+
+        document.getElementById('withdrawalsTable').innerHTML = html;
+      });
+    }
+
+    async function approveTask(taskId, userId, userEmail, taskPrice, taskTitle) {
+      // Ensure we use the actual task price from the task data
+      const taskSnapshot = await firebase.database().ref('tasks/' + taskId).once('value');
+      const taskData = taskSnapshot.val();
+      const actualPrice = taskData.taskPrice || taskData.amount || taskPrice || 2;
+
+      const result = await Swal.fire({
+        title: '<i class="bi bi-check-circle-fill"></i> Approve Task?',
+        html: `Credit <strong style="color: #11998e;">₹${actualPrice}</strong> to <strong>${userEmail}</strong>?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#11998e',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="bi bi-check-lg"></i> Yes, Approve',
+        cancelButtonText: '<i class="bi bi-x-lg"></i> Cancel',
+        showClass: {
+          popup: 'animate__animated animate__zoomIn'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__zoomOut'
+        }
+      });
+
+      if (!result.isConfirmed) return;
+
+      try {
+        Swal.fire({
+          title: 'Processing...',
+          html: 'Please wait while we approve this task',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        await firebase.database().ref('tasks/' + taskId).update({
+          status: 'approved',
+          reviewedAt: Date.now(),
+          creditedAmount: actualPrice
+        });
+
+        const userRef = firebase.database().ref('users/' + userId);
+        await userRef.transaction((current) => {
+          if (current) {
+            current.balance = (current.balance || 0) + actualPrice;
+            current.taskEarnings = (current.taskEarnings || 0) + actualPrice;
+          }
+          return current;
+        });
+
+        notifyTaskApproval(userEmail, taskTitle, actualPrice);
+
+        Swal.fire({
+          icon: 'success',
+          title: '<i class="bi bi-check-circle-fill"></i> Task Approved!',
+          html: `<strong>₹${actualPrice}</strong> credited to user successfully`,
+          confirmButtonColor: '#11998e',
+          showClass: {
+            popup: 'animate__animated animate__bounceIn'
+          }
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.message,
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    }
+
+    async function rejectTask(taskId, userEmail) {
+      const { value: rejectionReason } = await Swal.fire({
+        title: 'Reject Task?',
+        html: `Please provide a reason for rejecting the task for ${userEmail}.`,
+        input: 'textarea',
+        inputPlaceholder: 'Reason for rejection (e.g., screenshot not clear, task not completed correctly)',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Reject',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'Reason is required for rejection';
+          }
+        }
+      });
+
+      if (rejectionReason) {
+        try {
+          await firebase.database().ref('tasks/' + taskId).update({
+            status: 'rejected',
+            reviewedAt: Date.now(),
+            rejectionReason: rejectionReason // Store the rejection reason
+          });
+
+          sendTelegramNotification(`❌ <b>Task Rejected</b>\n\n👤 User: ${userEmail}\n📝 Reason: ${rejectionReason}\n📅 Date: ${new Date().toLocaleString('en-IN')}`);
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Task Rejected',
+            text: `Reason: ${rejectionReason}`,
+            timer: 3000,
+            showConfirmButton: false
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message
+          });
+        }
+      }
+    }
+
+    async function approveWithdrawal(withdrawalId, userId, amount, userEmail) {
+      const result = await Swal.fire({
+        title: '<i class="bi bi-cash-coin"></i> Confirm Payment Sent?',
+        html: `Have you sent <strong style="color: #11998e;">₹${amount}</strong> via UPI to <strong>${userEmail}</strong>?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#11998e',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="bi bi-check-circle"></i> Yes, I Sent It',
+        cancelButtonText: '<i class="bi bi-x-circle"></i> Not Yet',
+        showClass: {
+          popup: 'animate__animated animate__fadeInDown'
+        }
+      });
+
+      if (result.isConfirmed) {
+        try {
+          Swal.fire({
+            title: 'Processing...',
+            html: 'Updating withdrawal status and deducting balance',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            }
+          });
+
+          const userSnapshot = await firebase.database().ref('users/' + userId).once('value');
+          const userData = userSnapshot.val();
+          const currentBalance = userData.balance || 0;
+
+          if (currentBalance < amount) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Insufficient Balance',
+              text: `User only has ₹${currentBalance} but withdrawal is ₹${amount}`,
+              confirmButtonColor: '#dc3545'
+            });
+            return;
+          }
+
+          await firebase.database().ref('withdrawals/' + withdrawalId).update({
+            status: 'approved',
+            processedAt: Date.now()
+          });
+
+          const newBalance = currentBalance - amount;
+          await firebase.database().ref('users/' + userId).update({
+            balance: newBalance
+          });
+
+          notifyWithdrawalApproval(userEmail, amount);
+
+          Swal.fire({
+            icon: 'success',
+            title: '<i class="bi bi-check-circle-fill"></i> Withdrawal Approved!',
+            html: `Payment of <strong>₹${amount}</strong> processed<br>User balance: ₹${currentBalance} → ₹${newBalance}`,
+            confirmButtonColor: '#11998e',
+            showClass: {
+              popup: 'animate__animated animate__bounceIn'
+            }
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error Occurred',
+            text: error.message,
+            confirmButtonColor: '#dc3545'
+          });
+        }
+      }
+    }
+
+    async function rejectWithdrawal(withdrawalId, userEmail, amount) {
+      const { value: rejectionReason } = await Swal.fire({
+        title: 'Reject Withdrawal?',
+        html: `Please provide a reason for rejecting the withdrawal request for ${userEmail}.`,
+        input: 'textarea',
+        inputPlaceholder: 'Reason for rejection (e.g., invalid UPI, insufficient balance)',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Reject',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'Reason is required for rejection';
+          }
+        }
+      });
+
+      if (rejectionReason) {
+        try {
+          await firebase.database().ref('withdrawals/' + withdrawalId).update({
+            status: 'rejected',
+            processedAt: Date.now(),
+            rejectionReason: rejectionReason // Store the rejection reason
+          });
+
+          sendTelegramNotification(`❌ <b>Withdrawal Rejected</b>\n\n👤 User: ${userEmail}\n💵 Amount: ₹${amount}\n📝 Reason: ${rejectionReason}\n📅 Date: ${new Date().toLocaleString('en-IN')}`);
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Withdrawal Rejected',
+            text: `Reason: ${rejectionReason}`,
+            timer: 3000,
+            showConfirmButton: false
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message
+          });
+        }
+      }
+    }
+
+    function logoutAdmin() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = 'index.html';
+      });
+    }
+
+    // Placeholder for Telegram notification function (implement if needed)
+    function sendTelegramNotification(message) {
+      console.log("Telegram notification:", message);
+      // Replace with actual Telegram API call if available/needed
+    }
+
+    // Placeholder for user notification functions (implement if needed)
+    function notifyTaskApproval(userEmail, taskTitle, amount) {
+      console.log(`Task approved for ${userEmail}: ${taskTitle}, Amount: ${amount}`);
+      // Implement user notification via email, push, etc.
+    }
+
+    function notifyWithdrawalApproval(userEmail, amount) {
+      console.log(`Withdrawal approved for ${userEmail}: Amount ${amount}`);
+      // Implement user notification via email, push, etc.
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Daily Campaign King</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="login-container">
+      <div class="text-center mb-4">
+        <h1 class="brand-title">💎 Daily Campaign King</h1>
+        <p class="brand-subtitle">Start Earning Today!</p>
+      </div>
+
+      <div class="card shadow-lg">
+        <div class="card-body p-4">
+          <h3 class="text-center mb-4">Create Account</h3>
+
+          <div id="signupForm">
+            <div class="mb-3">
+              <label class="form-label">📧 Email</label>
+              <input type="email" id="signupEmail" class="form-control" placeholder="your@email.com">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">🔒 Password</label>
+              <input type="password" id="signupPassword" class="form-control" placeholder="Minimum 6 characters">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">🎁 Referral Code (Optional)</label>
+              <input type="text" id="referralCode" class="form-control" placeholder="Enter referral code">
+            </div>
+            <button onclick="signupUser()" class="btn btn-success w-100 mb-3">🚀 Create Account</button>
+            <div class="text-center">
+              <p>Already have an account? <a href="index.html">Login</a></p>
+            </div>
+          </div>
+
+          <div id="loadingMsg" class="text-center" style="display: none;">
+            <div class="spinner-border text-success" role="status"></div>
+            <p class="mt-2">Creating your account...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="script.js"></script>
+  <script>
+    // Auto-login check
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = 'dashboard.html';
+      }
+    });
+
+    // Check for referral code in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      document.getElementById('referralCode').value = refCode;
+    }
+
+    function generateReferralCode() {
+      return 'DCK' + Math.random().toString(36).substr(2, 6).toUpperCase();
+    }
+
+    async function signupUser() {
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const referralCodeInput = document.getElementById('referralCode').value.trim(); // Renamed to avoid conflict
+
+      if (!email || !password) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Missing Fields',
+          text: 'Please fill all fields',
+          confirmButtonColor: '#198754'
+        });
+        return;
+      }
+
+      if (password.length < 6) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Weak Password',
+          text: 'Password must be at least 6 characters',
+          confirmButtonColor: '#dc3545'
+        });
+        return;
+      }
+
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('loadingMsg').style.display = 'block';
+
+      try {
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        const userId = userCredential.user.uid;
+        const generatedReferralCode = generateReferralCode(); // Use a different name for generated code
+
+        const userData = {
+          email: email,
+          referralCode: generatedReferralCode, // Use the generated code
+          referredBy: referralCodeInput || null,
+          balance: 0,
+          referralEarnings: 0,
+          taskEarnings: 0,
+          totalReferrals: 0,
+          upiId: null,
+          joinedAt: Date.now()
+        };
+
+        await firebase.database().ref('users/' + userId).set(userData);
+        console.log('User data saved:', userData); // Added console log
+
+        if (referralCodeInput) { // Check if referralCodeInput exists
+          const snapshot = await firebase.database().ref('users').orderByChild('referralCode').equalTo(referralCodeInput).once('value');
+          if (snapshot.exists()) {
+            const referrerId = Object.keys(snapshot.val())[0];
+            const referrerRef = firebase.database().ref('users/' + referrerId);
+
+            await referrerRef.transaction((current) => {
+              if (current) {
+                current.balance = (current.balance || 0) + 1;
+                current.referralEarnings = (current.referralEarnings || 0) + 1;
+                current.totalReferrals = (current.totalReferrals || 0) + 1;
+              }
+              return current;
+            });
+
+            // Assuming sendTelegramNotification is defined elsewhere or will be added
+            // sendTelegramNotification(`🎉 New Referral!\n${email} joined using ${referralCodeInput}\n₹1 credited to referrer`);
+          }
+        }
+
+        // Assuming notifyNewUser is defined elsewhere or will be added
+        // notifyNewUser(email, generatedReferralCode);
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Account Created!',
+          text: 'Redirecting to dashboard...',
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          window.location.href = 'dashboard.html';
+        });
+
+      } catch (error) {
+        console.error("Registration error:", error); // Log the error
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: error.message,
+          confirmButtonColor: '#dc3545'
+        });
+        document.getElementById('signupForm').style.display = 'block';
+        document.getElementById('loadingMsg').style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

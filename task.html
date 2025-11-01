@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Task - Daily Campaign King</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .task-step {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      border-left: 4px solid #667eea;
+      transition: all 0.3s;
+    }
+    .task-step:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+    .step-number {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body style="background: #f5f7fa; margin: 0; padding: 0;">
+  <nav class="navbar navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 15px;">
+    <div class="container-fluid" style="padding: 0 5px;">
+      <span class="navbar-brand mb-0 h1"><i class="bi bi-clipboard-check"></i> Complete Task</span>
+      <button onclick="window.location.href='tasks-page.html'" class="btn btn-light btn-sm"><i class="bi bi-x-lg"></i></button>
+    </div>
+  </nav>
+
+  <div class="container-fluid" style="padding: 15px 5px; max-width: 100%; margin-bottom: 20px;">
+    <div id="upiPrompt" class="card shadow-sm mb-3" style="display: none; border: none; border-radius: 15px; border-left: 4px solid #11998e;">
+      <div class="card-body" style="padding: 20px;">
+        <h6 style="color: #11998e; font-weight: 600;"><i class="bi bi-wallet2"></i> Link Your UPI to Get Paid!</h6>
+        <p class="text-muted mb-3" style="font-size: 0.9rem;">Add your UPI ID to receive instant payments</p>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+          <input type="text" id="upiInput" class="form-control" placeholder="yourname@upi">
+          <button onclick="saveUPI()" class="btn btn-success">Link UPI</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px; overflow: hidden;">
+      <div class="card-body" style="padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div class="text-center">
+          <h4 id="taskTitle" style="font-weight: 700; margin-bottom: 10px;">Loading Task...</h4>
+          <p id="taskDescription" style="opacity: 0.9; margin-bottom: 15px;">Complete this task and earn money</p>
+          <div class="d-flex justify-content-center align-items-center gap-3">
+            <div style="background: rgba(255,255,255,0.25); padding: 10px 20px; border-radius: 25px; backdrop-filter: blur(10px);">
+              <small style="opacity: 0.9; display: block;">You will earn</small>
+              <h3 style="margin: 0; font-weight: 700;">₹<span id="taskPrice">0</span></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="taskSteps" class="mb-3" style="display: none;">
+      <div class="card shadow-sm" style="border: none; border-radius: 15px;">
+        <div class="card-body" style="padding: 20px;">
+          <h6 style="color: #667eea; font-weight: 700; margin-bottom: 20px;"><i class="bi bi-list-ol"></i> Steps to Complete</h6>
+          <div id="stepsContainer"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="taskContent">
+      <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px;">
+        <div class="card-body" style="padding: 20px;">
+          <h6 style="color: #11998e; font-weight: 700; margin-bottom: 15px;"><i class="bi bi-chat-quote-fill"></i> Review Comment / Text to Post</h6>
+          <div class="comment-box" style="background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #11998e;">
+            <p id="reviewText" style="margin: 0; font-weight: 500; color: #333; line-height: 1.7; font-size: 0.95rem;">Loading...</p>
+          </div>
+          <button onclick="copyComment()" class="btn btn-primary mt-3 w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 12px; padding: 15px; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+            <i class="bi bi-clipboard-check"></i> Copy Comment / Text
+          </button>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px;">
+        <div class="card-body text-center" style="padding: 20px;">
+          <a id="taskLink" href="#" target="_blank" onclick="trackLinkClick()" class="btn btn-lg w-100 pulse-animation" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: none; color: white; border-radius: 12px; padding: 18px; font-weight: 700; box-shadow: 0 6px 20px rgba(240, 147, 251, 0.4); font-size: 1.1rem;">
+            <i class="bi bi-link-45deg"></i> Visit Link & Complete Task
+          </a>
+          <small class="text-muted d-block mt-2" style="font-size: 0.85rem;">Click the link above to complete the task</small>
+        </div>
+      </div>
+
+      <div id="uploadSection">
+        <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px; border-left: 4px solid #11998e;">
+          <div class="card-body" style="padding: 25px;">
+            <h6 style="color: #11998e; font-weight: 700; margin-bottom: 15px;"><i class="bi bi-image-fill"></i> Upload Screenshot</h6>
+            <p class="text-muted mb-3" style="font-size: 0.9rem;">Upload a screenshot of your completed task</p>
+            <input type="file" id="screenshot" class="form-control mb-3" accept="image/*" style="border: 2px dashed #11998e; padding: 20px; border-radius: 12px; cursor: pointer;" onchange="previewImage(this)">
+            <div id="imagePreview" style="display: none; margin-bottom: 15px;">
+              <img id="previewImg" style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 12px; border: 2px solid #11998e;">
+            </div>
+            <button onclick="submitTask()" class="btn btn-success w-100 btn-lg" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border: none; border-radius: 12px; padding: 18px; font-weight: 700; box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4); font-size: 1.1rem;">
+              <i class="bi bi-send-fill"></i> Submit Task & Earn ₹<span id="submitPrice">0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="loadingMsg" style="display: none;" class="text-center py-5">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+        <p class="mt-3" style="font-weight: 600; font-size: 1.1rem;">Uploading your task...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="script.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const taskId = urlParams.get('taskId');
+
+    let currentUser = null;
+    let selectedComment = '';
+    let currentTask = null;
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        checkUPI(user.uid);
+        loadTask();
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+
+    function checkUPI(userId) {
+      firebase.database().ref('users/' + userId).once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data || !data.upiId) {
+          document.getElementById('upiPrompt').style.display = 'block';
+        }
+      });
+    }
+
+    async function saveUPI() {
+      const upi = document.getElementById('upiInput').value.trim();
+      if (!upi) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Invalid UPI',
+          text: 'Please enter a valid UPI ID',
+          confirmButtonColor: '#667eea'
+        });
+        return;
+      }
+
+      try {
+        await firebase.database().ref('users/' + currentUser.uid).update({ upiId: upi });
+        document.getElementById('upiPrompt').style.display = 'none';
+        Swal.fire({
+          icon: 'success',
+          title: 'UPI Linked!',
+          text: 'You can now receive payments',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message,
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    }
+
+    function loadTask() {
+      if (!taskId) {
+        Swal.fire({
+          icon: 'error',
+          title: 'No Task Selected',
+          text: 'Please select a task from the tasks page',
+          confirmButtonColor: '#667eea'
+        }).then(() => {
+          window.location.href = 'tasks-page.html';
+        });
+        return;
+      }
+
+      firebase.database().ref('adminTasks/' + taskId).once('value', (snapshot) => {
+        const task = snapshot.val();
+
+        if (!task || task.active === false) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Task Not Available',
+            text: 'This task is no longer available',
+            confirmButtonColor: '#667eea'
+          }).then(() => {
+            window.location.href = 'tasks-page.html';
+          });
+          return;
+        }
+
+        currentTask = task;
+        document.getElementById('taskTitle').textContent = task.title || 'Complete Task';
+        document.getElementById('taskDescription').textContent = task.description || 'Complete this task to earn money';
+        document.getElementById('taskPrice').textContent = task.price || 2;
+        document.getElementById('submitPrice').textContent = task.price || 2;
+
+        if (task.comments && task.comments.length > 0) {
+          const randomComment = task.comments[Math.floor(Math.random() * task.comments.length)];
+          selectedComment = randomComment;
+          document.getElementById('reviewText').textContent = randomComment;
+        } else {
+          document.getElementById('reviewText').textContent = 'No comment/text provided for this task.';
+        }
+
+        if (task.steps && task.steps.length > 0) {
+          document.getElementById('taskSteps').style.display = 'block';
+          const stepsContainer = document.getElementById('stepsContainer');
+          let stepsHTML = '';
+          task.steps.forEach((step, index) => {
+            stepsHTML += `
+              <div class="task-step">
+                <div class="step-number">${index + 1}</div>
+                <div>
+                  <p style="margin: 0; color: #333; font-weight: 500; line-height: 1.6;">${step}</p>
+                </div>
+              </div>
+            `;
+          });
+          stepsContainer.innerHTML = stepsHTML;
+        }
+
+        document.getElementById('taskLink').href = task.link || '#';
+      });
+    }
+
+    function copyComment() {
+      if (!selectedComment) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'No Comment',
+          text: 'No comment available to copy',
+          confirmButtonColor: '#667eea'
+        });
+        return;
+      }
+
+      navigator.clipboard.writeText(selectedComment).then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Copied!',
+          html: '<p>Comment copied successfully!</p><p>Now click the "Visit Link" button below to complete the task</p>',
+          timer: 2500,
+          showConfirmButton: false
+        });
+      });
+    }
+
+    async function trackLinkClick() {
+      try {
+        const ipInfo = await getIPInfo();
+        const userSnapshot = await firebase.database().ref('users/' + currentUser.uid).once('value');
+        const userData = userSnapshot.val() || {};
+        
+        const message = `🔗 <b>Task Link Clicked!</b>\n\n👤 User: ${userData.email}\n📋 Task: ${currentTask.title}\n💰 Price: ₹${currentTask.price}\n\n📍 <b>Location:</b>\n🌐 IP: ${ipInfo.ip}\n🏙️ ${ipInfo.city}, ${ipInfo.region}\n🌍 ${ipInfo.country}\n📌 PIN: ${ipInfo.postal}\n📡 ISP: ${ipInfo.isp}\n\n📅 ${new Date().toLocaleString('en-IN')}`;
+        
+        sendTelegramNotification(message);
+      } catch (error) {
+        console.error('Error tracking link click:', error);
+      }
+    }
+
+    function previewImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('previewImg').src = e.target.result;
+          document.getElementById('imagePreview').style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    async function submitTask() {
+      const fileInput = document.getElementById('screenshot');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'No Screenshot',
+          text: 'Please upload a screenshot of your completed task',
+          confirmButtonColor: '#667eea'
+        });
+        return;
+      }
+
+      document.getElementById('uploadSection').style.display = 'none';
+      document.getElementById('loadingMsg').style.display = 'block';
+
+      try {
+        const storageRef = firebase.storage().ref();
+        const screenshotRef = storageRef.child(`screenshots/${currentUser.uid}_${Date.now()}.jpg`);
+        await screenshotRef.put(file);
+        const screenshotUrl = await screenshotRef.getDownloadURL();
+
+        const userSnapshot = await firebase.database().ref('users/' + currentUser.uid).once('value');
+        const userData = userSnapshot.val();
+
+        const taskRef = firebase.database().ref('tasks').push();
+        await taskRef.set({
+          userId: currentUser.uid,
+          userEmail: userData.email,
+          taskId: taskId,
+          taskTitle: currentTask.title,
+          taskNumber: currentTask.title || 'Task',
+          amount: currentTask.price || 2,
+          screenshot: screenshotUrl,
+          status: 'pending',
+          submittedAt: Date.now(),
+          reviewText: selectedComment,
+          creditProcessed: false
+        });
+
+        await notifyTaskSubmission(userData.email, currentTask.title, screenshotUrl, selectedComment);
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Task Submitted Successfully! 🎉',
+          html: `<p>Your task has been submitted for review</p><p><strong>Earning:</strong> ₹${currentTask.price}</p><p>You'll be notified when admin approves it!</p>`,
+          confirmButtonText: 'View My Tasks',
+          confirmButtonColor: '#11998e'
+        }).then(() => {
+          window.location.href = 'task-history.html';
+        });
+
+      } catch (error) {
+        console.error('Submit error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Submission Failed',
+          text: error.message || 'Failed to upload screenshot. Please try again.',
+          confirmButtonColor: '#dc3545'
+        });
+        document.getElementById('uploadSection').style.display = 'block';
+        document.getElementById('loadingMsg').style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

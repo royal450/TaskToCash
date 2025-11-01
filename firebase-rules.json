@@ -1,0 +1,19 @@
+
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "users": {
+      ".indexOn": ["referralCode", "email"]
+    },
+    "tasks": {
+      ".indexOn": ["userId", "status"]
+    },
+    "withdrawals": {
+      ".indexOn": ["userId", "status"]
+    },
+    "adminTasks": {
+      ".indexOn": ["active", "category"]
+    }
+  }
+}

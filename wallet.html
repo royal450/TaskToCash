@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet - Daily Campaign King</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body style="background: #f5f7fa; margin: 0; padding: 0;">
+  <nav class="navbar navbar-dark" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); margin: 0; padding: 15px;">
+    <div class="container-fluid" style="padding: 0 5px;">
+      <span class="navbar-brand mb-0 h1"><i class="bi bi-wallet2"></i> My Wallet</span>
+    </div>
+  </nav>
+
+  <div class="container-fluid" style="padding: 15px 5px; max-width: 100%;">
+    <div class="card shadow-sm mb-3 animate__animated animate__fadeInUp" style="border: none; border-radius: 15px;">
+      <div class="card-body" style="padding: 25px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 15px; color: white;">
+        <div class="text-center">
+          <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Total Balance</p>
+          <h1 style="margin: 10px 0; font-weight: 700;">₹<span id="userBalance">0</span></h1>
+          <p style="margin: 0; font-size: 0.85rem; opacity: 0.85;">Available for withdrawal</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-3 animate__animated animate__fadeInUp" style="border: none; border-radius: 15px;">
+      <div class="card-body" style="padding: 20px;">
+        <h6 style="color: #667eea; font-weight: 600; margin-bottom: 15px;"><i class="bi bi-credit-card-fill"></i> UPI Information</h6>
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">Linked UPI ID</small>
+            <p id="displayUPI" style="margin: 5px 0 0 0; font-weight: 600; color: #11998e;">Not linked</p>
+          </div>
+          <button onclick="showUpdateUPI()" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-fill"></i> Update</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="updateUPISection" class="card shadow-sm mb-3 animate__animated animate__fadeInUp" style="display: none; border: none; border-radius: 15px;">
+      <div class="card-body" style="padding: 20px;">
+        <h6 style="color: #667eea; font-weight: 600; margin-bottom: 15px;">Update UPI ID</h6>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+          <input type="text" id="newUpiId" class="form-control" placeholder="yourname@upi">
+          <button onclick="updateUPI()" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-3 animate__animated animate__fadeInUp" style="border: none; border-radius: 15px;">
+      <div class="card-body" style="padding: 20px;">
+        <h6 style="color: #11998e; font-weight: 600; margin-bottom: 15px;"><i class="bi bi-cash-stack"></i> Withdraw Money</h6>
+
+        <div class="alert alert-warning animate__animated animate__shakeX" style="border-radius: 10px; border-left: 4px solid #ffc107;">
+          <small><i class="bi bi-info-circle-fill"></i> <strong>Min: ₹5 | Max: ₹1000/day</strong></small>
+        </div>
+
+        <div id="withdrawForm">
+          <div class="mb-3">
+            <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Enter Amount</label>
+            <div class="input-group input-group-lg">
+              <span class="input-group-text" style="background: #11998e; color: white; border: none;"><i class="bi bi-currency-rupee"></i></span>
+              <input type="number" id="withdrawAmount" class="form-control" placeholder="Enter amount" style="border: 2px solid #e0e0e0;">
+            </div>
+          </div>
+          <button onclick="requestWithdrawal()" class="btn btn-success w-100 btn-lg animate__animated animate__pulse" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border: none; border-radius: 10px; padding: 15px; font-weight: 600;">
+            <i class="bi bi-send-fill"></i> Submit Withdrawal Request
+          </button>
+        </div>
+
+        <div id="loadingMsg" style="display: none;" class="text-center py-4">
+          <div class="spinner-border text-success animate__animated animate__spin"></div>
+          <p class="mt-2">Processing...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm animate__animated animate__fadeInUp" style="border: none; border-radius: 15px; margin-bottom: 70px;">
+      <div class="card-body" style="padding: 20px;">
+        <h6 style="color: #667eea; font-weight: 600; margin-bottom: 15px;"><i class="bi bi-clock-history"></i> Withdrawal History</h6>
+        <div id="withdrawalHistory">
+          <p class="text-center text-muted">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <i class="bi bi-house-door-fill"></i>
+      <span>Home</span>
+    </a>
+    <a href="tasks-page.html" class="nav-item">
+      <i class="bi bi-list-task"></i>
+      <span>Tasks</span>
+    </a>
+    <a href="task-history.html" class="nav-item">
+      <i class="bi bi-clock-history"></i>
+      <span>History</span>
+    </a>
+    <a href="wallet.html" class="nav-item active">
+      <i class="bi bi-wallet2"></i>
+      <span>Wallet</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <i class="bi bi-person-fill"></i>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="script.js"></script>
+  <script>
+    let currentUser = null;
+    let userBalance = 0;
+    let userEmail = '';
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        loadUserData(user.uid);
+        loadWithdrawalHistory(user.uid);
+        trackPageView('Wallet');
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+
+    function loadUserData(userId) {
+      firebase.database().ref('users/' + userId).on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          userBalance = data.balance || 0;
+          userEmail = data.email;
+          document.getElementById('userBalance').textContent = userBalance;
+
+          if (data.upiId) {
+            document.getElementById('displayUPI').textContent = data.upiId;
+            document.getElementById('displayUPI').style.color = '#11998e';
+          } else {
+            document.getElementById('displayUPI').textContent = 'Not linked - Click Update';
+            document.getElementById('displayUPI').style.color = '#dc3545';
+          }
+        }
+      });
+    }
+
+    function showUpdateUPI() {
+      const section = document.getElementById('updateUPISection');
+      section.style.display = section.style.display === 'none' ? 'block' : 'none';
+      if (section.style.display === 'block') {
+        section.classList.add('animate__animated', 'animate__slideInDown');
+      }
+    }
+
+    async function updateUPI() {
+      const newUpi = document.getElementById('newUpiId').value.trim();
+      if (!newUpi) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Invalid Input',
+          text: 'Please enter a valid UPI ID',
+        });
+        return;
+      }
+
+      try {
+        await firebase.database().ref('users/' + currentUser.uid).update({ upiId: newUpi });
+        document.getElementById('updateUPISection').style.display = 'none';
+        Swal.fire({
+          icon: 'success',
+          title: 'UPI Updated',
+          text: '✅ UPI updated successfully!',
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Update Error',
+          text: 'Error: ' + error.message,
+        });
+      }
+    }
+
+    function loadWithdrawalHistory(userId) {
+      firebase.database().ref('withdrawals').orderByChild('userId').equalTo(userId).on('value', (snapshot) => {
+        const withdrawals = snapshot.val();
+        let html = '';
+
+        if (!withdrawals) {
+          html = '<div class="alert alert-light text-center animate__animated animate__fadeIn" style="border-radius: 10px;">No withdrawal requests yet</div>';
+        } else {
+          html = '<div class="table-responsive"><table class="table table-hover" style="margin: 0;"><thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;"><tr><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+          
+          const withdrawalArray = Object.entries(withdrawals).map(([key, value]) => ({
+            key: key,
+            ...value
+          }));
+          
+          withdrawalArray.sort((a, b) => b.requestedAt - a.requestedAt);
+          
+          withdrawalArray.forEach(wd => {
+            const date = new Date(wd.requestedAt).toLocaleDateString('en-IN');
+            const time = new Date(wd.requestedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            const statusBadge = wd.status === 'approved' ? 'success' : wd.status === 'rejected' ? 'danger' : 'warning';
+            const statusText = wd.status === 'approved' ? 'Paid' : wd.status === 'rejected' ? 'Rejected' : 'Pending';
+            html += `<tr><td><strong style="color: #11998e;">₹${wd.amount}</strong></td><td><span class="badge bg-${statusBadge}">${statusText}</span></td><td><small>${date}<br>${time}</small></td></tr>`;
+          });
+          html += '</tbody></table></div>';
+        }
+
+        document.getElementById('withdrawalHistory').innerHTML = html;
+      });
+    }
+
+    async function requestWithdrawal() {
+      const amount = parseInt(document.getElementById('withdrawAmount').value);
+
+      if (!amount || isNaN(amount)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Invalid Input',
+          text: 'Please enter a valid amount',
+        });
+        return;
+      }
+
+      if (amount < 50) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Amount Too Low',
+          text: 'Minimum withdrawal amount is ₹50',
+        });
+        return;
+      }
+
+      if (amount > 1000) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Limit Exceeded',
+          text: 'Maximum withdrawal limit is ₹1000 per day',
+        });
+        return;
+      }
+
+      if (amount > userBalance) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Insufficient Balance',
+          text: `You have ₹${userBalance} but trying to withdraw ₹${amount}`,
+        });
+        return;
+      }
+
+      const userSnapshot = await firebase.database().ref('users/' + currentUser.uid).once('value');
+      const userData = userSnapshot.val();
+
+      if (!userData.upiId) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'UPI Not Linked',
+          text: 'Please link your UPI ID first!',
+        });
+        showUpdateUPI();
+        return;
+      }
+
+      const pendingWithdrawalsSnapshot = await firebase.database()
+        .ref('withdrawals')
+        .orderByChild('userId')
+        .equalTo(currentUser.uid)
+        .once('value');
+      
+      const pendingWithdrawals = pendingWithdrawalsSnapshot.val();
+      if (pendingWithdrawals) {
+        const hasPending = Object.values(pendingWithdrawals).some(w => w.status === 'pending');
+        if (hasPending) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Pending Request Exists',
+            text: 'You already have a pending withdrawal request. Please wait for it to be processed.',
+          });
+          return;
+        }
+      }
+
+      document.getElementById('withdrawForm').style.display = 'none';
+      document.getElementById('loadingMsg').style.display = 'block';
+      document.getElementById('loadingMsg').classList.add('animate__animated', 'animate__pulse');
+
+      try {
+        const withdrawalRef = firebase.database().ref('withdrawals').push();
+        await withdrawalRef.set({
+          userId: currentUser.uid,
+          userEmail: userEmail,
+          amount: amount,
+          upiId: userData.upiId,
+          status: 'pending',
+          requestedAt: Date.now()
+        });
+
+        notifyWithdrawal(userEmail, amount, userData.upiId);
+
+        document.getElementById('withdrawAmount').value = '';
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Request Submitted',
+          html: `✅ Withdrawal request of ₹${amount} submitted!<br>Admin will process it soon.`,
+          timer: 2500,
+          showConfirmButton: false
+        }).then(() => {
+          window.location.href = 'dashboard.html';
+        });
+
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Submission Error',
+          text: 'Error: ' + error.message,
+        });
+        document.getElementById('withdrawForm').style.display = 'block';
+        document.getElementById('loadingMsg').style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
