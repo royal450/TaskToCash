@@ -120,32 +120,23 @@
   </nav>
 
   <div class="container-fluid" style="padding: 20px 15px 100px 15px; max-width: 100%;">
-    <div class="row g-3 mb-4">
+    <div class="row g-2 mb-3">
       <div class="col-4">
-        <div class="text-center" style="background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 20px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
-            <i class="bi bi-list-task" style="font-size: 1.5rem; color: white;"></i>
-          </div>
-          <h3 style="margin: 0; font-weight: 800; color: #2c3e50;"><span id="totalTasks">0</span></h3>
-          <small style="color: #7f8c8d; font-weight: 600;">Total</small>
+        <div class="text-center" style="background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 10px 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 2px solid #667eea;">
+          <h4 style="margin: 0; font-weight: 800; color: #667eea; font-size: 1.4rem;"><span id="totalTasks">0</span></h4>
+          <small style="color: #7f8c8d; font-weight: 600; font-size: 0.7rem;">Total</small>
         </div>
       </div>
       <div class="col-4">
-        <div class="text-center" style="background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 20px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);">
-          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
-            <i class="bi bi-check-circle-fill" style="font-size: 1.5rem; color: white;"></i>
-          </div>
-          <h3 style="margin: 0; font-weight: 800; color: #10b981;"><span id="approvedTasks">0</span></h3>
-          <small style="color: #7f8c8d; font-weight: 600;">Approved</small>
+        <div class="text-center" style="background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 10px 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 2px solid #10b981;">
+          <h4 style="margin: 0; font-weight: 800; color: #10b981; font-size: 1.4rem;"><span id="approvedTasks">0</span></h4>
+          <small style="color: #7f8c8d; font-weight: 600; font-size: 0.7rem;">Approved</small>
         </div>
       </div>
       <div class="col-4">
-        <div class="text-center" style="background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 20px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);">
-          <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
-            <i class="bi bi-clock-fill" style="font-size: 1.5rem; color: white;"></i>
-          </div>
-          <h3 style="margin: 0; font-weight: 800; color: #f59e0b;"><span id="pendingTasks">0</span></h3>
-          <small style="color: #7f8c8d; font-weight: 600;">Pending</small>
+        <div class="text-center" style="background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 10px 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 2px solid #ef4444;">
+          <h4 style="margin: 0; font-weight: 800; color: #ef4444; font-size: 1.4rem;"><span id="pendingTasks">0</span></h4>
+          <small style="color: #7f8c8d; font-weight: 600; font-size: 0.7rem;">Rejected</small>
         </div>
       </div>
     </div>
@@ -226,7 +217,7 @@
 
         let totalCount = 0;
         let approvedCount = 0;
-        let pendingCount = 0;
+        let rejectedCount = 0;
 
         let html = '<div class="row g-3">';
 
@@ -247,13 +238,13 @@
             statusText = 'Rejected';
             statusGradient = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
             borderColor = '#ef4444';
+            rejectedCount++;
           } else {
             statusClass = 'status-pending';
             statusIcon = 'bi-clock-fill';
             statusText = 'Pending';
             statusGradient = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
             borderColor = '#f59e0b';
-            pendingCount++;
           }
 
           const submitDate = task.submittedAt ? new Date(task.submittedAt).toLocaleString('en-IN', { 
@@ -321,7 +312,7 @@
 
         html += '</div>';
         container.innerHTML = html;
-        updateStats(totalCount, approvedCount, pendingCount);
+        updateStats(totalCount, approvedCount, rejectedCount);
       });
 
       listenForApprovals();
@@ -392,10 +383,10 @@
       }, 4000);
     }
 
-    function updateStats(total, approved, pending) {
+    function updateStats(total, approved, rejected) {
       document.getElementById('totalTasks').textContent = total;
       document.getElementById('approvedTasks').textContent = approved;
-      document.getElementById('pendingTasks').textContent = pending;
+      document.getElementById('pendingTasks').textContent = rejected;
     }
 
     function viewScreenshot(url) {
