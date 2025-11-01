@@ -16,11 +16,12 @@ Daily Campaign King is a web-based task completion and earning platform. Users c
 - **Icons**: Bootstrap Icons
 - **Alerts**: SweetAlert2
 - **Backend Services**: Firebase 9.22.0
-  - Firebase Authentication
-  - Firebase Realtime Database
-  - Firebase Storage
+  - ~~Firebase Authentication~~ ❌ (Replaced with custom auth)
+  - Firebase Realtime Database ✅ (Only service still in use)
+  - ~~Firebase Storage~~ ❌ (Replaced with Telegram uploads)
+- **Authentication**: Custom client-side auth with SHA-256 + salt hashing
 - **External APIs**:
-  - Telegram Bot API (for notifications)
+  - Telegram Bot API (for notifications AND screenshot uploads)
   - ipapi.co (for IP tracking)
 
 ## Project Structure
@@ -106,12 +107,35 @@ Deployment is configured using Replit's autoscale deployment:
 - Port: 5000
 
 ## Security Considerations
+⚠️ **IMPORTANT: Please read SECURITY_README.md for detailed security warnings**
+
+- **Custom Authentication**: Client-side auth with SHA-256 + salt password hashing
+  - ⚠️ Not as secure as server-side authentication
+  - Passwords stored as hashed values in Firebase Realtime Database
+  - Users are stored with salted hashes to prevent rainbow table attacks
+- **Database Access**: Firebase Realtime Database is publicly accessible (rules need updating)
+  - Current rules require Firebase Auth which we're not using
+  - ⚠️ Security vulnerability - anyone can read/write if rules not properly configured
+- **Screenshot Storage**: Sent directly to Telegram instead of Firebase Storage
+  - No storage quota issues
+  - Screenshots available in Telegram chat
 - Firebase configuration and API keys are exposed in client-side code (standard for Firebase web apps)
-- Telegram bot token is exposed (consider moving to environment variables)
+- Telegram bot token is exposed in client-side code
 - IP tracking is enabled for security monitoring
-- Firebase security rules enforce authentication
+
+**Recommendation**: This setup is suitable for development/testing. For production, implement proper backend authentication or use a third-party auth service.
 
 ## Recent Changes
+- **2025-11-01**: Custom Authentication Migration
+  - ⚠️ **BREAKING**: Replaced Firebase Authentication with custom auth system
+  - Reason: Firebase Auth quota exceeded and blocked
+  - Created `custom-auth.js` with SHA-256 + salt password hashing
+  - Updated all 13+ HTML pages to use custom authentication
+  - Screenshot uploads now sent directly to Telegram (bypassing Firebase Storage)
+  - Screenshots no longer stored in Firebase Storage (sends via Telegram Bot API)
+  - Added `SECURITY_README.md` with important security warnings
+  - **Security Note**: Client-side auth has limitations - see SECURITY_README.md
+  
 - **2025-11-01**: Initial Replit setup
   - Added Python HTTP server for static file serving
   - Configured workflow for automatic server startup

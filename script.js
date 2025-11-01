@@ -134,10 +134,10 @@ function notifyWithdrawalApproval(userEmail, amount) {
 
 // Track user page views
 async function trackPageView(pageName) {
-  const user = firebase.auth().currentUser;
+  const user = customAuth ? customAuth.getCurrentUser() : null;
   if (user) {
     const ipInfo = await getIPInfo();
-    const userSnapshot = await firebase.database().ref('users/' + user.uid).once('value');
+    const userSnapshot = await firebase.database().ref('users/' + user.userId).once('value');
     const userData = userSnapshot.val() || {};
     
     const message = `👁️ <b>Page View: ${pageName}</b>\n\n👤 ${userData.email}\n💰 Balance: ₹${userData.balance || 0}\n🌐 IP: ${ipInfo.ip}\n🏙️ ${ipInfo.city}, ${ipInfo.country}\n📡 ${ipInfo.isp}\n📅 ${new Date().toLocaleString('en-IN')}`;

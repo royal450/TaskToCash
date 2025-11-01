@@ -1,10 +1,15 @@
-async function hashPassword(password) {
+async function hashPassword(password, salt) {
   const encoder = new TextEncoder();
-  const data = encoder.encode(password);
+  const data = encoder.encode(salt + password + salt);
   const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+  const hashArray = Array.from(new Uint8Array(hash));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function generateSalt() {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
 }
 
 class CustomAuth {
@@ -40,12 +45,14 @@ class CustomAuth {
       }
 
       const userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      const hashedPassword = await hashPassword(password);
+      const salt = generateSalt();
+      const hashedPassword = await hashPassword(password, salt);
       
       const userData = {
         userId: userId,
         email: email,
-        password: hashedPassword,
+        passwordHash: hashedPassword,
+        passwordSalt: salt,
         referralCode: 'REF' + userId.substring(5, 13).toUpperCase(),
         balance: 0,
         taskEarnings: 0,
@@ -70,7 +77,8 @@ class CustomAuth {
       await notifyNewUser(email, userData.referralCode);
 
       const userForStorage = { ...userData };
-      delete userForStorage.password;
+      delete userForStorage.passwordHash;
+      delete userForStorage.passwordSalt;
       this.saveUserToStorage(userForStorage);
 
       return { user: userForStorage };
@@ -91,9 +99,13 @@ class CustomAuth {
       const userId = Object.keys(snapshot.val())[0];
       const userData = snapshot.val()[userId];
       
-      const hashedPassword = await hashPassword(password);
+      if (!userData.passwordSalt || !userData.passwordHash) {
+        throw new Error('Invalid account data. Please contact support.');
+      }
+
+      const hashedPassword = await hashPassword(password, userData.passwordSalt);
       
-      if (userData.password !== hashedPassword) {
+      if (userData.passwordHash !== hashedPassword) {
         throw new Error('Invalid email or password');
       }
 
@@ -102,7 +114,8 @@ class CustomAuth {
       }
 
       const userForStorage = { ...userData };
-      delete userForStorage.password;
+      delete userForStorage.passwordHash;
+      delete userForStorage.passwordSalt;
       this.saveUserToStorage(userForStorage);
 
       return { user: userForStorage };
@@ -133,7 +146,8 @@ class CustomAuth {
     const snapshot = await firebase.database().ref('users/' + userId).once('value');
     const userData = snapshot.val();
     if (userData) {
-      delete userData.password;
+      delete userData.passwordHash;
+      delete userData.passwordSalt;
     }
     return userData;
   }
