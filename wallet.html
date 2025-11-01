@@ -16,7 +16,7 @@
     </div>
   </nav>
 
-  <div class="container-fluid" style="padding: 15px 5px 120px 5px; max-width: 100%;">
+  <div class="container-fluid" style="padding: 15px 5px; max-width: 100%;">
     <div class="card shadow-sm mb-3 animate__animated animate__fadeInUp" style="border: none; border-radius: 15px;">
       <div class="card-body" style="padding: 25px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 15px; color: white;">
         <div class="text-center">
@@ -56,7 +56,7 @@
         <h6 style="color: #11998e; font-weight: 600; margin-bottom: 15px;"><i class="bi bi-cash-stack"></i> Withdraw Money</h6>
 
         <div class="alert alert-warning animate__animated animate__shakeX" style="border-radius: 10px; border-left: 4px solid #ffc107;">
-          <small><i class="bi bi-info-circle-fill"></i> <strong><span id="withdrawalLimits">Loading...</span></strong></small>
+          <small><i class="bi bi-info-circle-fill"></i> <strong>Min: ₹5 | Max: ₹1000/day</strong></small>
         </div>
 
         <div id="withdrawForm">
@@ -107,8 +107,8 @@
       <span>Wallet</span>
     </a>
     <a href="profile.html" class="nav-item">
-      <i class="bi bi-gift-fill"></i>
-      <span>Referral</span>
+      <i class="bi bi-person-fill"></i>
+      <span>Profile</span>
     </a>
   </nav>
 
@@ -122,12 +122,9 @@
     let userBalance = 0;
     let userEmail = '';
 
-    customAuth.onAuthStateChanged(async (user) => {
+    customAuth.onAuthStateChanged((user) => {
       if (user) {
         currentUser = user;
-        await initializeCurrency();
-        const curr = getCurrency();
-        document.getElementById('withdrawalLimits').textContent = `Min: ${formatCurrency(curr.minWithdrawal)} | Method: ${curr.withdrawalMethod}`;
         loadUserData(user.userId);
         loadWithdrawalHistory(user.userId);
         trackPageView('Wallet');
