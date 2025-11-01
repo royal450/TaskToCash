@@ -45,20 +45,18 @@
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="script.js"></script>
+  <script src="custom-auth.js"></script>
   <script>
-    // Auto-login check
-    firebase.auth().onAuthStateChanged((user) => {
+    customAuth.onAuthStateChanged((user) => {
       if (user) {
         window.location.href = 'dashboard.html';
       }
     });
 
-    function loginUser() {
+    async function loginUser() {
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
 
@@ -75,56 +73,19 @@
       document.getElementById('loginForm').style.display = 'none';
       document.getElementById('loadingMsg').style.display = 'block';
 
-      firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(async (userCredential) => {
-          Swal.close();
-
-          const userId = userCredential.user.uid;
-          const userSnapshot = await firebase.database().ref('users/' + userId).once('value');
-          const userData = userSnapshot.val();
-
-          // If user data doesn't exist, create it
-          if (!userData) {
-            console.log('User data not found, creating new entry');
-            const newUserData = {
-              email: userCredential.user.email,
-              referralCode: 'REF' + userId.substring(0, 8).toUpperCase(),
-              balance: 0,
-              taskEarnings: 0,
-              referralEarnings: 0,
-              totalReferrals: 0,
-              joinedAt: Date.now(),
-              blocked: false,
-              upiId: ''
-            };
-            await firebase.database().ref('users/' + userId).set(newUserData);
-            window.location.href = 'dashboard.html';
-            return;
-          }
-
-          if (userData.blocked === true) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Account Blocked',
-              text: 'Your account has been blocked. Contact support.',
-              confirmButtonColor: '#dc3545'
-            });
-            firebase.auth().signOut();
-            return;
-          }
-
-          window.location.href = 'dashboard.html';
-        })
-        .catch((error) => {
-          Swal.fire({
-            icon: 'error',
-            title: 'Login Failed',
-            text: error.message,
-            confirmButtonColor: '#dc3545'
-          });
-          document.getElementById('loginForm').style.display = 'block';
-          document.getElementById('loadingMsg').style.display = 'none';
+      try {
+        await customAuth.signIn(email, password);
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Failed',
+          text: error.message,
+          confirmButtonColor: '#dc3545'
         });
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('loadingMsg').style.display = 'none';
+      }
     }
   </script>
 </body>
