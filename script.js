@@ -1,15 +1,23 @@
 
 // Firebase Configuration - Daily Campaign King (Main App)
 // Get your actual config from: Firebase Console > Project Settings > Your apps > Web app
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBuioOF7DCq-qIoa1D6ZyZbrAVeGjbfv3Y",
-  authDomain: "daily-campaign-king.firebaseapp.com",
-  databaseURL: "https://daily-campaign-king-default-rtdb.firebaseio.com",
-  projectId: "daily-campaign-king",
-  storageBucket: "get-good-night.appspot.com",
-  messagingSenderId: "925353220910",
-  appId: "1:925353220910:web:8a4c3f7e5b6d9c1a2b3c4d"
+  apiKey: "AIzaSyC5XRIVrqI9tM-hnkQOfEaGbFW_5C9B0iA",
+  authDomain: "kingapp-dbcde.firebaseapp.com",
+  databaseURL: "https://kingapp-dbcde-default-rtdb.firebaseio.com",
+  projectId: "kingapp-dbcde",
+  storageBucket: "kingapp-dbcde.appspot.com",
+  messagingSenderId: "30155737602",
+  appId: "1:30155737602:web:4fc3b3e961097b1e47b51b",
+  measurementId: "G-S0591W111V"
 };
+
+
+
+
+
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
