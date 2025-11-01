@@ -18,57 +18,59 @@
     </div>
   </nav>
 
-  <div class="container-fluid" style="padding: 15px 5px; max-width: 100%;">
-    <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px;">
-      <div class="card-body" style="padding: 20px;">
-        <h5 style="color: #667eea; font-weight: 600; margin-bottom: 15px;">
-          <i class="bi bi-person-circle"></i> Welcome, <span id="userEmail">User</span>!
-        </h5>
-        <div class="row g-2">
-          <div class="col-6">
-            <div class="stat-box" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 20px; border-radius: 12px; text-align: center; color: white;">
-              <h3 style="font-size: 1.8rem; margin: 0; font-weight: 700;">₹<span id="userBalance">0</span></h3>
-              <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.9;">Balance</p>
-            </div>
+  <div class="container-fluid" style="padding: 12px 8px; max-width: 100%;">
+    <div style="background: white; border-radius: 18px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
+          <i class="bi bi-person-circle"></i>
+        </div>
+        <div>
+          <h6 style="margin: 0; font-weight: 700; color: #1a1a1a; font-size: 0.9rem;">Welcome back!</h6>
+          <p style="margin: 0; color: #666; font-size: 0.75rem;"><span id="userEmail">User</span></p>
+        </div>
+      </div>
+      <div class="row g-2">
+        <div class="col-6">
+          <div style="background: linear-gradient(135deg, #11998e15 0%, #38ef7d15 100%); border: 2px solid #11998e30; padding: 15px 12px; border-radius: 15px; text-align: center;">
+            <div style="color: #11998e; font-size: 1.6rem; font-weight: 900; margin-bottom: 4px;">₹<span id="userBalance">0</span></div>
+            <div style="color: #11998e; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Balance</div>
           </div>
-          <div class="col-6">
-            <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 12px; text-align: center; color: white;">
-              <h3 style="font-size: 1.8rem; margin: 0; font-weight: 700;"><span id="totalReferrals">0</span></h3>
-              <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.9;">Referrals</p>
-            </div>
+        </div>
+        <div class="col-6">
+          <div style="background: linear-gradient(135deg, #f093fb15 0%, #f5576c15 100%); border: 2px solid #f5576c30; padding: 15px 12px; border-radius: 15px; text-align: center;">
+            <div style="color: #f5576c; font-size: 1.6rem; font-weight: 900; margin-bottom: 4px;"><span id="totalReferrals">0</span></div>
+            <div style="color: #f5576c; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Referrals</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px;">
-      <div class="card-body" style="padding: 20px;">
-        <h6 style="color: #667eea; font-weight: 600; margin-bottom: 15px;"><i class="bi bi-lightning-charge-fill"></i> Quick Actions</h6>
-        <div class="row g-2">
-          <div class="col-6">
-            <button onclick="window.location.href='tasks-page.html'" class="btn w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; padding: 15px; border: none; font-weight: 600;">
-              <i class="bi bi-list-task" style="font-size: 1.5rem; display: block; margin-bottom: 5px;"></i>
-              <span style="font-size: 0.85rem;">Browse Tasks</span>
-            </button>
-          </div>
-          <div class="col-6">
-            <button onclick="window.location.href='wallet.html'" class="btn w-100" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border-radius: 10px; padding: 15px; border: none; font-weight: 600;">
-              <i class="bi bi-wallet2" style="font-size: 1.5rem; display: block; margin-bottom: 5px;"></i>
-              <span style="font-size: 0.85rem;">Withdraw</span>
-            </button>
-          </div>
-          <div class="col-6">
-            <button onclick="window.location.href='task-history.html'" class="btn w-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border-radius: 10px; padding: 15px; border: none; font-weight: 600;">
-              <i class="bi bi-clock-history" style="font-size: 1.5rem; display: block; margin-bottom: 5px;"></i>
-              <span style="font-size: 0.85rem;">Task History</span>
-            </button>
-          </div>
-          <div class="col-6">
-            <button onclick="window.location.href='profile.html'" class="btn w-100" style="background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); color: white; border-radius: 10px; padding: 15px; border: none; font-weight: 600;">
-              <i class="bi bi-person-circle" style="font-size: 1.5rem; display: block; margin-bottom: 5px;"></i>
-              <span style="font-size: 0.85rem;">My Profile</span>
-            </button>
-          </div>
+    <div style="background: white; border-radius: 18px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);">
+      <h6 style="color: #1a1a1a; font-weight: 800; margin-bottom: 12px; font-size: 0.85rem;"><i class="bi bi-lightning-charge-fill" style="color: #FFD700;"></i> Quick Actions</h6>
+      <div class="row g-2">
+        <div class="col-6">
+          <button onclick="window.location.href='tasks-page.html'" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 15px; padding: 12px 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
+            <i class="bi bi-list-task" style="font-size: 1.8rem; display: block; margin-bottom: 6px;"></i>
+            <span style="font-size: 0.75rem;">Tasks</span>
+          </button>
+        </div>
+        <div class="col-6">
+          <button onclick="window.location.href='wallet.html'" style="width: 100%; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none; border-radius: 15px; padding: 12px 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3); transition: all 0.3s;">
+            <i class="bi bi-wallet2" style="font-size: 1.8rem; display: block; margin-bottom: 6px;"></i>
+            <span style="font-size: 0.75rem;">Withdraw</span>
+          </button>
+        </div>
+        <div class="col-6">
+          <button onclick="window.location.href='task-history.html'" style="width: 100%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 15px; padding: 12px 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3); transition: all 0.3s;">
+            <i class="bi bi-clock-history" style="font-size: 1.8rem; display: block; margin-bottom: 6px;"></i>
+            <span style="font-size: 0.75rem;">History</span>
+          </button>
+        </div>
+        <div class="col-6">
+          <button onclick="window.location.href='profile.html'" style="width: 100%; background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 100%); color: white; border: none; border-radius: 15px; padding: 12px 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(250, 139, 255, 0.3); transition: all 0.3s;">
+            <i class="bi bi-person-circle" style="font-size: 1.8rem; display: block; margin-bottom: 6px;"></i>
+            <span style="font-size: 0.75rem;">Profile</span>
+          </button>
         </div>
       </div>
     </div>
