@@ -18,7 +18,7 @@
     </div>
   </nav>
 
-  <div class="container-fluid" style="padding: 15px 10px; max-width: 100%;">
+  <div class="container-fluid" style="padding: 15px 10px 100px 10px; max-width: 100%;">
     <ul class="nav nav-pills mb-3" style="background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
       <li class="nav-item">
         <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tasks"><i class="bi bi-clipboard-check"></i> Tasks</button>
@@ -204,10 +204,10 @@
         loadAllData();
       } else {
         Swal.fire({
-          title: '<i class="bi bi-shield-lock-fill"></i> Admin Login',
+          title: '<i class="bi bi-shield-lock-fill"></i> Admin Access',
           input: 'password',
-          inputLabel: 'Enter Admin Password',
-          inputPlaceholder: 'Password',
+          inputLabel: 'Enter Password',
+          inputPlaceholder: 'Enter admin password',
           showCancelButton: true,
           confirmButtonText: '<i class="bi bi-unlock-fill"></i> Login',
           cancelButtonText: '<i class="bi bi-x-circle"></i> Cancel',
@@ -227,11 +227,11 @@
             cancelButton: 'btn-modern'
           }
         }).then((result) => {
-          if (result.isConfirmed && result.value === 'admin123') {
+          if (result.isConfirmed && result.value === '8485') {
             customAuth.signInAnonymously();
             Toast.fire({
               icon: 'success',
-              title: 'Logged in successfully!'
+              title: 'Admin access granted!'
             });
           } else if (result.dismiss === Swal.DismissReason.cancel) {
             window.location.href = 'index.html';

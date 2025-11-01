@@ -74,6 +74,7 @@ async function getIPInfo() {
       city: data.city || 'Unknown',
       region: data.region || 'Unknown',
       country: data.country_name || 'Unknown',
+      countryCode: data.country_code || 'IN',
       postal: data.postal || 'Unknown',
       isp: data.org || 'Unknown',
       lat: data.latitude || 0,
@@ -85,13 +86,56 @@ async function getIPInfo() {
       ip: 'Unknown', 
       city: 'Unknown', 
       region: 'Unknown', 
-      country: 'India', 
+      country: 'India',
+      countryCode: 'IN',
       postal: 'Unknown', 
       isp: 'Unknown', 
       lat: 0, 
       lon: 0 
     };
   }
+}
+
+// Currency configuration based on country
+let userCurrency = {
+  symbol: '₹',
+  code: 'INR',
+  taskPrice: 2,
+  minWithdrawal: 50,
+  withdrawalMethod: 'UPI'
+};
+
+// Initialize currency based on user location
+async function initializeCurrency() {
+  const ipInfo = await getIPInfo();
+  
+  if (ipInfo.countryCode !== 'IN') {
+    userCurrency = {
+      symbol: '$',
+      code: 'USD',
+      taskPrice: 0.01,
+      minWithdrawal: 1,
+      withdrawalMethod: 'Trust Wallet'
+    };
+  }
+  
+  localStorage.setItem('userCurrency', JSON.stringify(userCurrency));
+  return userCurrency;
+}
+
+// Get currency settings
+function getCurrency() {
+  const stored = localStorage.getItem('userCurrency');
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  return userCurrency;
+}
+
+// Format currency
+function formatCurrency(amount) {
+  const curr = getCurrency();
+  return `${curr.symbol}${amount}`;
 }
 
 // Enhanced notification for task submission with screenshot and IP tracking
