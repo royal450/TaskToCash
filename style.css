@@ -420,5 +420,9 @@ html, body {
 }
 
 body {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
+.container-fluid {
+  padding-bottom: 20px !important;
 }
