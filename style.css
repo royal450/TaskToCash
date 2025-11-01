@@ -420,9 +420,18 @@ html, body {
 }
 
 body {
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important;
 }
 
 .container-fluid {
-  padding-bottom: 20px !important;
+  padding-bottom: 40px !important;
+}
+
+.navbar {
+  padding: 10px 0 !important;
+  min-height: auto !important;
+}
+
+.navbar .container-fluid {
+  padding: 8px 16px !important;
 }
