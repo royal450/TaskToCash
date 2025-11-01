@@ -107,13 +107,11 @@
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="script.js"></script>mpat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="script.js"></script>
+  <script src="custom-auth.js"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const taskId = urlParams.get('taskId');
@@ -122,10 +120,10 @@
     let selectedComment = '';
     let currentTask = null;
 
-    firebase.auth().onAuthStateChanged((user) => {
+    customAuth.onAuthStateChanged((user) => {
       if (user) {
         currentUser = user;
-        checkUPI(user.uid);
+        checkUPI(user.userId);
         loadTask();
       } else {
         window.location.href = 'index.html';
@@ -153,7 +151,7 @@
       }
 
       try {
-        await firebase.database().ref('users/' + currentUser.uid).update({ upiId: upi });
+        await firebase.database().ref('users/' + currentUser.userId).update({ upiId: upi });
         document.getElementById('upiPrompt').style.display = 'none';
         Swal.fire({
           icon: 'success',
@@ -303,16 +301,16 @@
         const compressedFile = await compressImage(file);
         
         const storageRef = firebase.storage().ref();
-        const screenshotRef = storageRef.child(`screenshots/${currentUser.uid}_${Date.now()}.jpg`);
+        const screenshotRef = storageRef.child(`screenshots/${currentUser.userId}_${Date.now()}.jpg`);
         await screenshotRef.put(compressedFile);
         const screenshotUrl = await screenshotRef.getDownloadURL();
 
-        const userSnapshot = await firebase.database().ref('users/' + currentUser.uid).once('value');
+        const userSnapshot = await firebase.database().ref('users/' + currentUser.userId).once('value');
         const userEmail = userSnapshot.val().email;
 
         const taskRef = firebase.database().ref('tasks').push();
         await taskRef.set({
-          userId: currentUser.uid,
+          userId: currentUser.userId,
           userEmail: userEmail,
           taskId: taskId,
           taskTitle: currentTask.title,

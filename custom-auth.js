@@ -115,6 +115,16 @@ class CustomAuth {
     this.clearUserFromStorage();
   }
 
+  async signInAnonymously() {
+    const anonymousUser = {
+      userId: 'admin_anonymous',
+      email: 'admin@dailycampaignking.com',
+      isAnonymous: true
+    };
+    this.saveUserToStorage(anonymousUser);
+    return { user: anonymousUser };
+  }
+
   getCurrentUser() {
     return this.currentUser;
   }

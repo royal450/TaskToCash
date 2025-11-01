@@ -57,11 +57,11 @@
   </nav>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="script.js"></script>
+  <script src="custom-auth.js"></script>
   <script>
-    firebase.auth().onAuthStateChanged((user) => {
+    customAuth.onAuthStateChanged((user) => {
       if (user) {
         loadTasks();
         trackPageView('Tasks Page');
@@ -143,9 +143,9 @@
 
     async function startTask(taskId) {
       const ipInfo = await getIPInfo();
-      const user = firebase.auth().currentUser;
+      const user = customAuth.currentUser;
       if (user) {
-        const userSnapshot = await firebase.database().ref('users/' + user.uid).once('value');
+        const userSnapshot = await firebase.database().ref('users/' + user.userId).once('value');
         const userData = userSnapshot.val() || {};
         const taskSnapshot = await firebase.database().ref('adminTasks/' + taskId).once('value');
         const taskData = taskSnapshot.val();

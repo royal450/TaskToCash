@@ -113,20 +113,20 @@
   </nav>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="script.js"></script>
+  <script src="custom-auth.js"></script>
   <script>
     let currentUser = null;
     let userBalance = 0;
     let userEmail = '';
 
-    firebase.auth().onAuthStateChanged((user) => {
+    customAuth.onAuthStateChanged((user) => {
       if (user) {
         currentUser = user;
-        loadUserData(user.uid);
-        loadWithdrawalHistory(user.uid);
+        loadUserData(user.userId);
+        loadWithdrawalHistory(user.userId);
         trackPageView('Wallet');
       } else {
         window.location.href = 'index.html';
@@ -172,7 +172,7 @@
       }
 
       try {
-        await firebase.database().ref('users/' + currentUser.uid).update({ upiId: newUpi });
+        await firebase.database().ref('users/' + currentUser.userId).update({ upiId: newUpi });
         document.getElementById('updateUPISection').style.display = 'none';
         Swal.fire({
           icon: 'success',
@@ -258,7 +258,7 @@
         return;
       }
 
-      const userSnapshot = await firebase.database().ref('users/' + currentUser.uid).once('value');
+      const userSnapshot = await firebase.database().ref('users/' + currentUser.userId).once('value');
       const userData = userSnapshot.val();
 
       if (!userData.upiId) {
@@ -274,7 +274,7 @@
       const pendingWithdrawalsSnapshot = await firebase.database()
         .ref('withdrawals')
         .orderByChild('userId')
-        .equalTo(currentUser.uid)
+        .equalTo(currentUser.userId)
         .once('value');
       
       const pendingWithdrawals = pendingWithdrawalsSnapshot.val();
@@ -297,7 +297,7 @@
       try {
         const withdrawalRef = firebase.database().ref('withdrawals').push();
         await withdrawalRef.set({
-          userId: currentUser.uid,
+          userId: currentUser.userId,
           userEmail: userEmail,
           amount: amount,
           upiId: userData.upiId,

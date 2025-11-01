@@ -111,17 +111,17 @@
   </nav>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="script.js"></script>
+  <script src="custom-auth.js"></script>
   <script>
     let currentUser = null;
 
-    firebase.auth().onAuthStateChanged(async (user) => {
+    customAuth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
-        const userSnapshot = await firebase.database().ref('users/' + user.uid).once('value');
+        const userSnapshot = await firebase.database().ref('users/' + user.userId).once('value');
         const userData = userSnapshot.val();
         
         if (userData && userData.blocked === true) {
@@ -132,14 +132,14 @@
             confirmButtonColor: '#dc3545',
             allowOutsideClick: false
           }).then(() => {
-            firebase.auth().signOut();
+            customAuth.signOut();
             window.location.href = 'index.html';
           });
           return;
         }
         
-        loadUserData(user.uid);
-        loadTaskHistory(user.uid);
+        loadUserData(user.userId);
+        loadTaskHistory(user.userId);
         trackPageView('Dashboard');
       } else {
         window.location.href = 'index.html';

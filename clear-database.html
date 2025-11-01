@@ -55,12 +55,12 @@
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="script.js"></script>
+  <script src="custom-auth.js"></script>
   <script>
-    firebase.auth().onAuthStateChanged((user) => {
+    customAuth.onAuthStateChanged((user) => {
       if (!user) {
         Swal.fire({
           title: '<i class="bi bi-shield-lock-fill"></i> Admin Login',
@@ -74,7 +74,7 @@
           cancelButtonColor: '#6c757d'
         }).then((result) => {
           if (result.isConfirmed && result.value === 'admin123') {
-            firebase.auth().signInAnonymously();
+            customAuth.signInAnonymously();
           } else {
             window.location.href = 'index.html';
           }
