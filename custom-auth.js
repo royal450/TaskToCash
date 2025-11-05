@@ -35,7 +35,7 @@ class CustomAuth {
     localStorage.removeItem('currentUser');
   }
 
-  async signUp(email, password, referredBy = null) {
+  async signUp(email, password, phone, whatsapp, referredBy = null) {
     try {
       const usersRef = firebase.database().ref('users');
       const snapshot = await usersRef.orderByChild('email').equalTo(email).once('value');
@@ -44,21 +44,30 @@ class CustomAuth {
         throw new Error('Email already exists');
       }
 
-      const userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const phoneSnapshot = await usersRef.orderByChild('phone').equalTo(phone).once('value');
+      if (phoneSnapshot.exists()) {
+        throw new Error('Phone number already registered');
+      }
+
+      const timestamp = Date.now();
+      const randomNum = Math.floor(10000 + Math.random() * 90000);
+      const userId = 'DCK' + timestamp.toString().slice(-6) + randomNum;
       const salt = generateSalt();
       const hashedPassword = await hashPassword(password, salt);
       
       const userData = {
         userId: userId,
         email: email,
+        phone: phone,
+        whatsapp: whatsapp,
         passwordHash: hashedPassword,
         passwordSalt: salt,
-        referralCode: 'REF' + userId.substring(5, 13).toUpperCase(),
+        referralCode: 'REF' + userId.substring(3, 9).toUpperCase(),
         balance: 0,
         taskEarnings: 0,
         referralEarnings: 0,
         totalReferrals: 0,
-        joinedAt: Date.now(),
+        joinedAt: timestamp,
         blocked: false,
         upiId: '',
         referredBy: referredBy || ''
@@ -74,7 +83,7 @@ class CustomAuth {
         }
       }
 
-      await notifyNewUser(email, userData.referralCode);
+      await notifyNewUser(email, userData.referralCode, phone, whatsapp);
 
       const userForStorage = { ...userData };
       delete userForStorage.passwordHash;
@@ -125,6 +134,10 @@ class CustomAuth {
   }
 
   async signOut() {
+    const user = this.getCurrentUser();
+    if (user && typeof notifyUserLogout === 'function') {
+      await notifyUserLogout(user.email, user.userId);
+    }
     this.clearUserFromStorage();
   }
 

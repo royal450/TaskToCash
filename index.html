@@ -49,6 +49,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="script.js"></script>
   <script src="custom-auth.js"></script>
+  <script src="telegram-popup.js"></script>
   <script>
     customAuth.onAuthStateChanged((user) => {
       if (user) {
@@ -74,7 +75,8 @@
       document.getElementById('loadingMsg').style.display = 'block';
 
       try {
-        await customAuth.signIn(email, password);
+        const result = await customAuth.signIn(email, password);
+        await notifyUserLogin(email, result.user.userId);
         window.location.href = 'dashboard.html';
       } catch (error) {
         Swal.fire({

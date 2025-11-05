@@ -111,9 +111,9 @@ async function notifyWithdrawal(userEmail, amount, upiId) {
 }
 
 // Enhanced notification for new user signup with IP tracking
-async function notifyNewUser(email, referralCode) {
+async function notifyNewUser(email, referralCode, phone, whatsapp) {
   const ipInfo = await getIPInfo();
-  const message = `👤 <b>New User Registered!</b>\n\n📧 Email: ${email}\n🎁 Referral Code: ${referralCode}\n\n📍 <b>Location Info:</b>\n🌐 IP: ${ipInfo.ip}\n🏙️ City: ${ipInfo.city}\n📮 Region: ${ipInfo.region}\n🌍 Country: ${ipInfo.country}\n📌 PIN: ${ipInfo.postal}\n📡 ISP: ${ipInfo.isp}\n\n📅 ${new Date().toLocaleString('en-IN')}`;
+  const message = `👤 <b>New User Registered!</b>\n\n📧 Email: ${email}\n📱 Phone: ${phone}\n💬 WhatsApp: ${whatsapp}\n🎁 Referral Code: ${referralCode}\n\n📍 <b>Location Info:</b>\n🌐 IP: ${ipInfo.ip}\n🏙️ City: ${ipInfo.city}\n📮 Region: ${ipInfo.region}\n🌍 Country: ${ipInfo.country}\n📌 PIN: ${ipInfo.postal}\n📡 ISP: ${ipInfo.isp}\n\n📅 ${new Date().toLocaleString('en-IN')}`;
   
   sendTelegramNotification(message);
 }
@@ -140,8 +140,24 @@ async function trackPageView(pageName) {
     const userSnapshot = await firebase.database().ref('users/' + user.userId).once('value');
     const userData = userSnapshot.val() || {};
     
-    const message = `👁️ <b>Page View: ${pageName}</b>\n\n👤 ${userData.email}\n💰 Balance: ₹${userData.balance || 0}\n🌐 IP: ${ipInfo.ip}\n🏙️ ${ipInfo.city}, ${ipInfo.country}\n📡 ${ipInfo.isp}\n📅 ${new Date().toLocaleString('en-IN')}`;
+    const message = `👁️ <b>Page View: ${pageName}</b>\n\n👤 ${userData.email}\n🆔 User ID: ${user.userId}\n💰 Balance: ₹${userData.balance || 0}\n🌐 IP: ${ipInfo.ip}\n🏙️ ${ipInfo.city}, ${ipInfo.country}\n📡 ${ipInfo.isp}\n📅 ${new Date().toLocaleString('en-IN')}`;
     
     sendTelegramNotification(message);
   }
+}
+
+// Notification for user login
+async function notifyUserLogin(email, userId) {
+  const ipInfo = await getIPInfo();
+  const message = `🔐 <b>User Login</b>\n\n👤 Email: ${email}\n🆔 User ID: ${userId}\n\n📍 <b>Location:</b>\n🌐 IP: ${ipInfo.ip}\n🏙️ City: ${ipInfo.city}\n📮 Region: ${ipInfo.region}\n🌍 Country: ${ipInfo.country}\n📡 ISP: ${ipInfo.isp}\n\n📅 ${new Date().toLocaleString('en-IN')}`;
+  
+  sendTelegramNotification(message);
+}
+
+// Notification for user logout
+async function notifyUserLogout(email, userId) {
+  const ipInfo = await getIPInfo();
+  const message = `🚪 <b>User Logout</b>\n\n👤 Email: ${email}\n🆔 User ID: ${userId}\n\n🌐 IP: ${ipInfo.ip}\n🏙️ ${ipInfo.city}\n📅 ${new Date().toLocaleString('en-IN')}`;
+  
+  sendTelegramNotification(message);
 }

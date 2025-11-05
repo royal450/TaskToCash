@@ -26,6 +26,15 @@
               <input type="email" id="signupEmail" class="form-control" placeholder="your@email.com">
             </div>
             <div class="mb-3">
+              <label class="form-label">📱 Phone Number</label>
+              <input type="tel" id="signupPhone" class="form-control" placeholder="10-digit mobile number" maxlength="10" pattern="[0-9]{10}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">💬 WhatsApp Number</label>
+              <input type="tel" id="signupWhatsapp" class="form-control" placeholder="WhatsApp number (10 digits)" maxlength="10" pattern="[0-9]{10}">
+              <small class="text-muted">Can be same as phone number</small>
+            </div>
+            <div class="mb-3">
               <label class="form-label">🔒 Password</label>
               <input type="password" id="signupPassword" class="form-control" placeholder="Minimum 6 characters">
             </div>
@@ -68,15 +77,37 @@
 
     async function signupUser() {
       const email = document.getElementById('signupEmail').value.trim();
+      const phone = document.getElementById('signupPhone').value.trim();
+      const whatsapp = document.getElementById('signupWhatsapp').value.trim();
       const password = document.getElementById('signupPassword').value;
       const referralCodeInput = document.getElementById('referralCode').value.trim();
 
-      if (!email || !password) {
+      if (!email || !password || !phone || !whatsapp) {
         Swal.fire({
           icon: 'warning',
           title: 'Missing Fields',
-          text: 'Please fill all fields',
+          text: 'Please fill all required fields',
           confirmButtonColor: '#198754'
+        });
+        return;
+      }
+
+      if (!/^[0-9]{10}$/.test(phone)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Phone',
+          text: 'Please enter a valid 10-digit phone number',
+          confirmButtonColor: '#dc3545'
+        });
+        return;
+      }
+
+      if (!/^[0-9]{10}$/.test(whatsapp)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid WhatsApp',
+          text: 'Please enter a valid 10-digit WhatsApp number',
+          confirmButtonColor: '#dc3545'
         });
         return;
       }
@@ -95,7 +126,7 @@
       document.getElementById('loadingMsg').style.display = 'block';
 
       try {
-        await customAuth.signUp(email, password, referralCodeInput || null);
+        await customAuth.signUp(email, password, phone, whatsapp, referralCodeInput || null);
 
         Swal.fire({
           icon: 'success',

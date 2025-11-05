@@ -63,7 +63,15 @@
       <div class="tab-pane fade" id="users">
         <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px;">
           <div class="card-body" style="padding: 20px;">
-            <h5 style="color: #f5576c; font-weight: 600; margin-bottom: 15px;"><i class="bi bi-people-fill"></i> All Users</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 style="color: #f5576c; font-weight: 600; margin: 0;"><i class="bi bi-people-fill"></i> All Users</h5>
+              <div style="flex: 1; max-width: 400px; margin-left: 20px;">
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-search"></i></span>
+                  <input type="text" id="userSearchInput" class="form-control" placeholder="Search by User ID, Email, or Phone..." onkeyup="searchUsers()">
+                </div>
+              </div>
+            </div>
             <div id="usersTable" class="table-responsive">
               <p class="text-center text-muted">Loading...</p>
             </div>
@@ -199,58 +207,20 @@
       }
     });
 
-    customAuth.onAuthStateChanged((user) => {
-      if (user) {
-        loadAllData();
-      } else {
-        Swal.fire({
-          title: '<i class="bi bi-shield-lock-fill"></i> Admin Login',
-          input: 'password',
-          inputLabel: 'Enter Admin Password',
-          inputPlaceholder: 'Password',
-          showCancelButton: true,
-          confirmButtonText: '<i class="bi bi-unlock-fill"></i> Login',
-          cancelButtonText: '<i class="bi bi-x-circle"></i> Cancel',
-          confirmButtonColor: '#667eea',
-          cancelButtonColor: '#dc3545',
-          background: '#fff',
-          backdrop: 'rgba(102, 126, 234, 0.4)',
-          showClass: {
-            popup: 'animate__animated animate__fadeInDown'
-          },
-          hideClass: {
-            popup: 'animate__animated animate__fadeOutUp'
-          },
-          customClass: {
-            popup: 'border-radius-15',
-            confirmButton: 'btn-modern',
-            cancelButton: 'btn-modern'
-          }
-        }).then((result) => {
-          if (result.isConfirmed && result.value === 'admin123') {
-            customAuth.signInAnonymously();
-            Toast.fire({
-              icon: 'success',
-              title: 'Logged in successfully!'
-            });
-          } else if (result.dismiss === Swal.DismissReason.cancel) {
-            window.location.href = 'index.html';
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Access Denied',
-              text: 'Incorrect password',
-              confirmButtonColor: '#dc3545',
-              showClass: {
-                popup: 'animate__animated animate__shakeX'
-              }
-            }).then(() => {
-              window.location.href = 'index.html';
-            });
-          }
-        });
-      }
-    });
+    // Admin authentication check
+    if (localStorage.getItem('adminAuthenticated') !== 'true') {
+      window.location.href = 'admin-lock.html';
+    }
+    
+    const authTime = parseInt(localStorage.getItem('adminAuthTime') || '0');
+    if (Date.now() - authTime > 3600000) {
+      localStorage.removeItem('adminAuthenticated');
+      localStorage.removeItem('adminAuthTime');
+      window.location.href = 'admin-lock.html';
+    }
+
+    // Load all admin data
+    loadAllData();
 
     function loadAllData() {
       loadTasks();
@@ -497,48 +467,8 @@
     function loadUsers() {
       firebase.database().ref('users').on('value', (snapshot) => {
         const users = snapshot.val();
-        let html = '';
-
-        if (!users || Object.keys(users).length === 0) {
-          html = '<div class="alert alert-info text-center"><i class="bi bi-info-circle"></i> No users registered yet</div>';
-        } else {
-          html = '<div class="row g-3">';
-          Object.entries(users).forEach(([id, user]) => {
-          const date = new Date(user.joinedAt || Date.now()).toLocaleDateString('en-IN');
-            const isBlocked = user.blocked === true;
-            const statusBadge = isBlocked ? '<span class="badge bg-danger">Blocked</span>' : '<span class="badge bg-success">Active</span>';
-
-            html += `
-              <div class="col-md-6 col-lg-4">
-                <div class="card" style="border: none; border-radius: 12px; border-left: 4px solid ${isBlocked ? '#dc3545' : '#11998e'}; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                  <div class="card-body" style="padding: 15px;">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                      <h6 style="font-weight: 600; margin: 0; font-size: 0.9rem;">${user.email || 'Unknown'}</h6>
-                      ${statusBadge}
-                    </div>
-                    <div class="mb-2">
-                      <small class="text-muted">Balance:</small> <strong style="color: #11998e;">₹${user.balance || 0}</strong><br>
-                      <small class="text-muted">Referrals:</small> <strong>${user.totalReferrals || 0}</strong><br>
-                      <small class="text-muted">UPI:</small> ${user.upiId || '<span class="text-muted">Not linked</span>'}<br>
-                      <small class="text-muted">Joined:</small> ${date}
-                    </div>
-                    <div class="d-grid gap-2">
-                      <button onclick="${isBlocked ? `unblockUser('${id}', '${user.email}')` : `blockUser('${id}', '${user.email}')`}" class="btn btn-sm ${isBlocked ? 'btn-success' : 'btn-danger'}">
-                        <i class="bi bi-${isBlocked ? 'unlock' : 'lock'}-fill"></i> ${isBlocked ? 'Unblock' : 'Block'} User
-                      </button>
-                      <button onclick="adjustBalance('${id}', '${user.email}', ${user.balance || 0})" class="btn btn-sm btn-warning">
-                        <i class="bi bi-cash-coin"></i> Adjust Balance
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            `;
-          });
-          html += '</div>';
-        }
-
-        document.getElementById('usersTable').innerHTML = html;
+        allUsersData = users || {};
+        displayUsers(allUsersData);
       });
     }
 
@@ -1017,9 +947,182 @@
       }
     }
 
+    let allUsersData = {};
+    
+    function searchUsers() {
+      const searchTerm = document.getElementById('userSearchInput').value.toLowerCase().trim();
+      
+      if (!searchTerm) {
+        displayUsers(allUsersData);
+        return;
+      }
+      
+      const filtered = {};
+      Object.entries(allUsersData).forEach(([id, user]) => {
+        const userId = (user.userId || id).toLowerCase();
+        const email = (user.email || '').toLowerCase();
+        const phone = (user.phone || '').toLowerCase();
+        const whatsapp = (user.whatsapp || '').toLowerCase();
+        
+        if (userId.includes(searchTerm) || email.includes(searchTerm) || 
+            phone.includes(searchTerm) || whatsapp.includes(searchTerm)) {
+          filtered[id] = user;
+        }
+      });
+      
+      displayUsers(filtered);
+    }
+    
+    function displayUsers(usersToDisplay) {
+      let html = '';
+      
+      if (!usersToDisplay || Object.keys(usersToDisplay).length === 0) {
+        html = '<div class="alert alert-info text-center"><i class="bi bi-info-circle"></i> No users found</div>';
+      } else {
+        html = '<div class="row g-3">';
+        Object.entries(usersToDisplay).forEach(([id, user]) => {
+          const date = new Date(user.joinedAt || Date.now()).toLocaleDateString('en-IN');
+          const isBlocked = user.blocked === true;
+          const statusBadge = isBlocked ? '<span class="badge bg-danger">Blocked</span>' : '<span class="badge bg-success">Active</span>';
+          
+          html += `
+            <div class="col-md-6 col-lg-4">
+              <div class="card" style="border: none; border-radius: 12px; border-left: 4px solid ${isBlocked ? '#dc3545' : '#11998e'}; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div class="card-body" style="padding: 15px;">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 style="font-weight: 600; margin: 0; font-size: 0.9rem;">${user.email || 'Unknown'}</h6>
+                    ${statusBadge}
+                  </div>
+                  <div class="mb-2" style="font-size: 0.85rem;">
+                    <small class="text-muted">User ID:</small> <strong style="color: #667eea;">${user.userId || id}</strong><br>
+                    <small class="text-muted">Phone:</small> <strong>${user.phone || 'N/A'}</strong><br>
+                    <small class="text-muted">WhatsApp:</small> <strong>${user.whatsapp || 'N/A'}</strong><br>
+                    <small class="text-muted">Balance:</small> <strong style="color: #11998e;">₹${user.balance || 0}</strong><br>
+                    <small class="text-muted">Referrals:</small> <strong>${user.totalReferrals || 0}</strong><br>
+                    <small class="text-muted">UPI:</small> ${user.upiId || '<span class="text-muted">Not set</span>'}<br>
+                    <small class="text-muted">Joined:</small> ${date}
+                  </div>
+                  <div class="d-grid gap-2">
+                    <button onclick="${isBlocked ? `unblockUser('${id}', '${user.email}')` : `blockUser('${id}', '${user.email}')`}" class="btn btn-sm ${isBlocked ? 'btn-success' : 'btn-danger'}">
+                      <i class="bi bi-${isBlocked ? 'unlock' : 'lock'}-fill"></i> ${isBlocked ? 'Unblock' : 'Block'}
+                    </button>
+                    <button onclick="adjustBalance('${id}', '${user.email}', ${user.balance || 0})" class="btn btn-sm btn-warning">
+                      <i class="bi bi-cash-coin"></i> Adjust Balance
+                    </button>
+                    <button onclick="editUserDetails('${id}')" class="btn btn-sm btn-info">
+                      <i class="bi bi-pencil-square"></i> Edit Details
+                    </button>
+                    <button onclick="deleteUser('${id}', '${user.email}')" class="btn btn-sm btn-danger">
+                      <i class="bi bi-trash-fill"></i> Delete User
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+      
+      document.getElementById('usersTable').innerHTML = html;
+    }
+    
+    async function editUserDetails(userId) {
+      const userSnapshot = await firebase.database().ref('users/' + userId).once('value');
+      const user = userSnapshot.val();
+      
+      if (!user) {
+        Swal.fire('Error', 'User not found', 'error');
+        return;
+      }
+      
+      const { value: formValues } = await Swal.fire({
+        title: 'Edit User Details',
+        html: `
+          <div style="text-align: left;">
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input id="editEmail" class="swal2-input" value="${user.email || ''}" style="width: 90%;">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Phone</label>
+              <input id="editPhone" class="swal2-input" value="${user.phone || ''}" maxlength="10" style="width: 90%;">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">WhatsApp</label>
+              <input id="editWhatsapp" class="swal2-input" value="${user.whatsapp || ''}" maxlength="10" style="width: 90%;">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">UPI ID</label>
+              <input id="editUpi" class="swal2-input" value="${user.upiId || ''}" style="width: 90%;">
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Save Changes',
+        confirmButtonColor: '#11998e',
+        preConfirm: () => {
+          return {
+            email: document.getElementById('editEmail').value,
+            phone: document.getElementById('editPhone').value,
+            whatsapp: document.getElementById('editWhatsapp').value,
+            upiId: document.getElementById('editUpi').value
+          }
+        }
+      });
+      
+      if (formValues) {
+        try {
+          await firebase.database().ref('users/' + userId).update({
+            email: formValues.email,
+            phone: formValues.phone,
+            whatsapp: formValues.whatsapp,
+            upiId: formValues.upiId
+          });
+          
+          Swal.fire('Success!', 'User details updated', 'success');
+        } catch (error) {
+          Swal.fire('Error', error.message, 'error');
+        }
+      }
+    }
+    
+    async function deleteUser(userId, userEmail) {
+      const result = await Swal.fire({
+        title: 'Delete User?',
+        html: `Are you sure you want to <strong>permanently delete</strong> ${userEmail}?<br><br>This action cannot be undone!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Delete',
+        input: 'checkbox',
+        inputPlaceholder: 'I understand this is permanent'
+      });
+      
+      if (result.isConfirmed && result.value) {
+        try {
+          await firebase.database().ref('users/' + userId).remove();
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'User Deleted',
+            text: `${userEmail} has been permanently deleted`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } catch (error) {
+          Swal.fire('Error', error.message, 'error');
+        }
+      } else if (result.isConfirmed) {
+        Swal.fire('Cancelled', 'Please check the confirmation box', 'info');
+      }
+    }
+
     function logoutAdmin() {
-      customAuth.signOut();
-      window.location.href = 'index.html';
+      localStorage.removeItem('adminAuthenticated');
+      localStorage.removeItem('adminAuthTime');
+      window.location.href = 'admin-lock.html';
     }
 
     // Placeholder for Telegram notification function (implement if needed)
