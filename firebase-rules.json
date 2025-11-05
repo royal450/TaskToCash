@@ -1,22 +1,40 @@
 
 {
   "rules": {
-    ".read": true,
-    ".write": true,
+    ".read": false,
+    ".write": false,
     "users": {
-      ".indexOn": ["referralCode", "email", "phone"]
+      "$userId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['email', 'userId'])"
+      }
     },
     "tasks": {
-      ".indexOn": ["userId", "status"]
+      "$taskId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['userId', 'status'])"
+      }
     },
     "withdrawals": {
-      ".indexOn": ["userId", "status"]
+      "$withdrawalId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['userId', 'amount', 'status'])"
+      }
     },
     "adminTasks": {
-      ".indexOn": ["active", "category"]
+      "$taskId": {
+        ".read": true,
+        ".write": true
+      }
     },
     "pwaInstalls": {
-      ".indexOn": ["userId", "installedAt"]
+      "$installId": {
+        ".read": true,
+        ".write": true
+      }
     }
   }
 }

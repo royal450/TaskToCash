@@ -92,10 +92,10 @@
       <div class="lock-icon">
         <i class="bi bi-shield-lock-fill" style="font-size: 4rem; color: white;"></i>
       </div>
-      
+
       <h2 class="text-center mb-2" style="font-weight: 800; color: #1a1a1a;">Admin Access</h2>
       <p class="text-center text-muted mb-4">Enter password to continue</p>
-      
+
       <div id="loginForm">
         <div class="mb-4">
           <input type="password" id="adminPassword" class="form-control password-input" placeholder="••••••" maxlength="6" autocomplete="off">
@@ -124,10 +124,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    const ADMIN_PASSWORD = '848592';
+    const ADMIN_PASSWORD = 'DCK@Admin#2025!Secure';
     const MAX_ATTEMPTS = 5;
     const LOCKOUT_TIME = 300000;
-    
+
     let attempts = parseInt(localStorage.getItem('adminAttempts') || '0');
     let lockoutTime = parseInt(localStorage.getItem('adminLockout') || '0');
 
@@ -170,7 +170,7 @@
           localStorage.setItem('adminAuthTime', Date.now().toString());
           localStorage.removeItem('adminAttempts');
           localStorage.removeItem('adminLockout');
-          
+
           Swal.fire({
             icon: 'success',
             title: 'Access Granted',
@@ -183,18 +183,18 @@
         } else {
           attempts++;
           localStorage.setItem('adminAttempts', attempts.toString());
-          
+
           if (attempts >= MAX_ATTEMPTS) {
             lockoutTime = Date.now() + LOCKOUT_TIME;
             localStorage.setItem('adminLockout', lockoutTime.toString());
-            
+
             Swal.fire({
               icon: 'error',
               title: 'Access Denied',
               text: 'Too many failed attempts. Account locked for 5 minutes.',
               confirmButtonColor: '#dc3545'
             });
-            
+
             document.getElementById('adminPassword').value = '';
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('loadingMsg').style.display = 'none';
@@ -202,14 +202,14 @@
             const remaining = MAX_ATTEMPTS - attempts;
             document.getElementById('attemptsLeft').textContent = remaining;
             document.getElementById('attemptCounter').style.display = 'block';
-            
+
             Swal.fire({
               icon: 'error',
               title: 'Incorrect Password',
               text: `${remaining} attempts remaining`,
               confirmButtonColor: '#dc3545'
             });
-            
+
             document.getElementById('adminPassword').value = '';
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('loadingMsg').style.display = 'none';
