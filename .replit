@@ -6,7 +6,7 @@ expertMode = true
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Start Server"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -21,13 +21,13 @@ args = "web-server"
 name = "web-server"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python3 server.py"
 waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[workflows.workflow]]
 name = "Start Server"
@@ -47,7 +47,7 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 33075
+localPort = 46691
 externalPort = 3000
 
 [deployment]
