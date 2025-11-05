@@ -103,7 +103,7 @@
             console.log('Service Worker registered successfully');
           })
           .catch(error => {
-            console.warn('Service Worker registration failed (non-critical):', error.message);
+            console.log('Service Worker registration failed:', error);
           });
       });
     }

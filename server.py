@@ -21,9 +21,6 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
             self.path = '/index.html'
-        # Ensure service worker is served from root
-        elif self.path == '/service-worker.js' and not os.path.exists('service-worker.js'):
-            self.path = '/sw.js'
         return super().do_GET()
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
