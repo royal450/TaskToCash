@@ -1,8 +1,8 @@
 
 {
   "rules": {
-    ".read": false,
-    ".write": false,
+    ".read": true,
+    ".write": true,
     "users": {
       "$userId": {
         ".read": true,
