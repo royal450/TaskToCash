@@ -146,6 +146,7 @@
     let currentUser = null;
     let selectedComment = '';
     let currentTask = null;
+    let assignedCommentIndex = null;
 
     customAuth.onAuthStateChanged((user) => {
       if (user) {
@@ -198,6 +199,57 @@
       }
     }
 
+    async function assignUniqueComment(task) {
+      if (!task.comments || task.comments.length === 0) {
+        document.getElementById('reviewText').textContent = 'No comment/text provided for this task.';
+        return;
+      }
+
+      // Get list of used comments for this task
+      const usedCommentsRef = firebase.database().ref(`adminTasks/${taskId}/usedComments`);
+      const usedSnapshot = await usedCommentsRef.once('value');
+      const usedComments = usedSnapshot.val() || {};
+
+      // Find available comments
+      const availableIndices = [];
+      task.comments.forEach((comment, index) => {
+        if (!usedComments[index]) {
+          availableIndices.push(index);
+        }
+      });
+
+      if (availableIndices.length === 0) {
+        // All comments used - notify admin
+        Swal.fire({
+          icon: 'warning',
+          title: 'All Comments Used!',
+          text: 'All comments for this task have been used. Admin has been notified to add more comments.',
+          confirmButtonColor: '#667eea'
+        }).then(() => {
+          window.location.href = 'tasks-page.html';
+        });
+
+        // Notify admin via Telegram
+        const message = `⚠️ <b>All Comments Used!</b>\n\n📋 Task: ${task.title}\n🔢 Total Comments: ${task.comments.length}\n✅ All comments have been assigned\n\n🔴 Please add more comments for this task!\n📅 ${new Date().toLocaleString('en-IN')}`;
+        sendTelegramNotification(message);
+        return;
+      }
+
+      // Randomly select from available comments
+      const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+      assignedCommentIndex = randomIndex;
+      selectedComment = task.comments[randomIndex];
+
+      // Reserve this comment temporarily (will be marked permanently on submission)
+      await usedCommentsRef.child(randomIndex).set({
+        reservedBy: currentUser.userId,
+        reservedAt: Date.now(),
+        status: 'reserved'
+      });
+
+      document.getElementById('reviewText').textContent = selectedComment;
+    }
+
     function loadTask() {
       if (!taskId) {
         Swal.fire({
@@ -232,13 +284,8 @@
         document.getElementById('taskPrice').textContent = task.price || 2;
         document.getElementById('submitPrice').textContent = task.price || 2;
 
-        if (task.comments && task.comments.length > 0) {
-          const randomComment = task.comments[Math.floor(Math.random() * task.comments.length)];
-          selectedComment = randomComment;
-          document.getElementById('reviewText').textContent = randomComment;
-        } else {
-          document.getElementById('reviewText').textContent = 'No comment/text provided for this task.';
-        }
+        // Assign unique comment to this user
+        assignUniqueComment(task);
 
         if (task.steps && task.steps.length > 0) {
           document.getElementById('taskSteps').style.display = 'block';
@@ -368,8 +415,18 @@
           status: 'pending',
           submittedAt: Date.now(),
           reviewText: selectedComment,
+          commentIndex: assignedCommentIndex,
           creditProcessed: false
         });
+
+        // Mark comment as permanently used
+        if (assignedCommentIndex !== null) {
+          await firebase.database().ref(`adminTasks/${taskId}/usedComments/${assignedCommentIndex}`).update({
+            status: 'used',
+            usedBy: currentUser.userId,
+            usedAt: Date.now()
+          });
+        }
 
         // Then upload photo to Telegram in background
         const ipInfo = await getIPInfo();

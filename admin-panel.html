@@ -435,6 +435,9 @@
                       <button onclick="toggleTaskStatus('${id}', ${task.active !== false})" class="btn btn-sm flex-fill" style="background: ${task.active !== false ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)'}; color: white; border: none; border-radius: 12px; font-weight: 600; padding: 10px;">
                         <i class="bi bi-${task.active !== false ? 'pause' : 'play'}-circle-fill"></i> ${task.active !== false ? 'Pause' : 'Activate'}
                       </button>
+                      <button onclick="resetUsedComments('${id}', '${task.title}')" class="btn btn-sm" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 12px; font-weight: 600; padding: 10px 15px;" title="Reset all used comments">
+                        <i class="bi bi-arrow-clockwise"></i>
+                      </button>
                       <button onclick="deleteTask('${id}')" class="btn btn-sm" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 12px; font-weight: 600; padding: 10px 15px;">
                         <i class="bi bi-trash-fill"></i>
                       </button>
@@ -469,6 +472,38 @@
           title: 'Error',
           text: error.message
         });
+      }
+    }
+
+    async function resetUsedComments(taskId, taskTitle) {
+      const result = await Swal.fire({
+        title: 'Reset Used Comments?',
+        html: `This will make all comments available again for <strong>${taskTitle}</strong>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Reset All'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await firebase.database().ref(`adminTasks/${taskId}/usedComments`).remove();
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Comments Reset!',
+            text: 'All comments are now available for use again',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message
+          });
+        }
       }
     }
 
