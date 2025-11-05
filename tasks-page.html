@@ -384,7 +384,26 @@
       return configs[category] || configs['Other'];
     }
 
-    function loadTasks() {
+    async function loadTasks() {
+      const user = customAuth.currentUser;
+      if (!user) return;
+
+      // Get user's completed tasks
+      const userTasksSnapshot = await firebase.database().ref('tasks')
+        .orderByChild('userId')
+        .equalTo(user.userId)
+        .once('value');
+      
+      const userTasks = userTasksSnapshot.val() || {};
+      const completedTaskIds = new Set();
+      
+      // Store IDs of tasks user has already submitted
+      Object.values(userTasks).forEach(task => {
+        if (task.taskId) {
+          completedTaskIds.add(task.taskId);
+        }
+      });
+
       firebase.database().ref('adminTasks').on('value', (snapshot) => {
         const tasks = snapshot.val();
         const container = document.getElementById('tasksContainer');
@@ -403,8 +422,12 @@
         }
 
         let html = '<div class="task-grid">';
+        let hasAvailableTasks = false;
+        
         Object.entries(tasks).forEach(([id, task]) => {
-          if (task.active !== false) {
+          // Skip if task is inactive OR user already completed it
+          if (task.active !== false && !completedTaskIds.has(id)) {
+            hasAvailableTasks = true;
             const categoryConfig = getCategoryConfig(task.category);
             const thumbnail = task.thumbnail || categoryConfig.image;
             
@@ -449,7 +472,25 @@
           }
         });
         html += '</div>';
-        container.innerHTML = html;
+        
+        if (!hasAvailableTasks) {
+          container.innerHTML = `
+            <div class="no-tasks-wrapper">
+              <div class="no-tasks-illustration">
+                <i class="bi bi-check-circle-fill" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+              </div>
+              <h3 style="font-weight: 800; color: #1a1a2e; margin-bottom: 16px; font-size: 1.8rem;">All Tasks Completed! 🎉</h3>
+              <p style="color: #6b7280; font-size: 1.1rem; line-height: 1.6;">You've completed all available tasks. New tasks will appear here soon!</p>
+              <div style="margin-top: 20px;">
+                <a href="task-history.html" class="btn btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 30px; padding: 15px 40px; font-weight: 700; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);">
+                  <i class="bi bi-clock-history"></i> View History
+                </a>
+              </div>
+            </div>
+          `;
+        } else {
+          container.innerHTML = html;
+        }
       });
     }
 

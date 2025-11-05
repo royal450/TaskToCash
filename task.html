@@ -287,7 +287,7 @@
       try {
         const ipInfo = await getIPInfo();
         const message = `🔗 <b>Task Link Clicked!</b>\n\n👤 User: ${currentUser.email}\n📋 Task: ${currentTask.title}\n💰 Price: ₹${currentTask.price}\n\n📍 <b>Location:</b>\n🌐 IP: ${ipInfo.ip}\n🏙️ ${ipInfo.city}, ${ipInfo.region}\n🌍 ${ipInfo.country}\n📌 PIN: ${ipInfo.postal}\n📡 ISP: ${ipInfo.isp}\n\n📅 ${new Date().toLocaleString('en-IN')}`;
-        
+
         sendTelegramNotification(message);
       } catch (error) {
         console.error('Error tracking link click:', error);
@@ -356,11 +356,11 @@
         // First save to database immediately
         const taskRef = firebase.database().ref('tasks').push();
         const taskKey = taskRef.key;
-        
+
         await taskRef.set({
           userId: currentUser.userId,
           userEmail: currentUser.email,
-          taskId: taskId,
+          taskId: taskId, // Store task ID to track which task was completed
           taskTitle: currentTask.title,
           taskNumber: currentTask.title || 'Task',
           amount: currentTask.price || 2,
