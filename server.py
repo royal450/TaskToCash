@@ -8,14 +8,22 @@ HOST = "0.0.0.0"
 
 class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
-        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        self.send_header('Pragma', 'no-cache')
-        self.send_header('Expires', '0')
+        # Special handling for service worker - must be cacheable
+        if self.path.endswith('service-worker.js') or self.path.endswith('sw.js'):
+            self.send_header('Cache-Control', 'max-age=0')
+            self.send_header('Content-Type', 'application/javascript')
+        else:
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
         super().end_headers()
 
     def do_GET(self):
         if self.path == '/':
             self.path = '/index.html'
+        # Ensure service worker is served from root
+        elif self.path == '/service-worker.js' and not os.path.exists('service-worker.js'):
+            self.path = '/sw.js'
         return super().do_GET()
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
