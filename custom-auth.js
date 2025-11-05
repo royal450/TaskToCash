@@ -95,7 +95,22 @@ class CustomAuth {
         const referrerSnapshot = await usersRef.orderByChild('referralCode').equalTo(referredBy).once('value');
         if (referrerSnapshot.exists()) {
           const referrerId = Object.keys(referrerSnapshot.val())[0];
-          await firebase.database().ref('users/' + referrerId + '/totalReferrals').transaction(count => (count || 0) + 1);
+          const referrerData = referrerSnapshot.val()[referrerId];
+          
+          // Update referrer's stats and add ₹1 bonus
+          const updates = {};
+          updates[`users/${referrerId}/totalReferrals`] = (referrerData.totalReferrals || 0) + 1;
+          updates[`users/${referrerId}/referralEarnings`] = (referrerData.referralEarnings || 0) + 1;
+          updates[`users/${referrerId}/balance`] = (referrerData.balance || 0) + 1;
+          
+          await firebase.database().ref().update(updates);
+          
+          // Send Telegram notification
+          const message = `💰 <b>Referral Bonus Credited!</b>\n\n👤 Referrer: ${referrerData.email}\n🎁 Bonus: ₹1\n👥 New User: ${email}\n🔢 Total Referrals: ${(referrerData.totalReferrals || 0) + 1}\n💵 New Balance: ₹${(referrerData.balance || 0) + 1}\n\n📅 ${new Date().toLocaleString('en-IN')}`;
+          
+          if (typeof sendTelegramNotification === 'function') {
+            sendTelegramNotification(message);
+          }
         }
       }
 

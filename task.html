@@ -338,16 +338,25 @@
         return;
       }
 
+      // Validate file size (max 10MB for faster upload)
+      if (file.size > 10 * 1024 * 1024) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'File Too Large',
+          text: 'Please upload a screenshot smaller than 10MB',
+          confirmButtonColor: '#667eea'
+        });
+        return;
+      }
+
       document.getElementById('uploadSection').style.display = 'none';
       document.getElementById('loadingMsg').style.display = 'block';
 
       try {
-        const ipInfo = await getIPInfo();
-        const caption = `🎯 <b>New Task Submitted!</b>\n\n👤 <b>User Info:</b>\n📧 Email: ${currentUser.email}\n📋 Task: ${currentTask.title}\n💰 Reward: ₹${currentTask.price}\n💬 Comment: ${selectedComment.substring(0, 80)}...\n\n📍 <b>Location:</b>\n🌐 IP: ${ipInfo.ip}\n🏙️ City: ${ipInfo.city}\n📮 Region: ${ipInfo.region}\n🌍 Country: ${ipInfo.country}\n📌 PIN: ${ipInfo.postal}\n📡 ISP: ${ipInfo.isp}\n\n⏳ Status: Pending Approval\n📅 ${new Date().toLocaleString('en-IN')}`;
-
-        await sendPhotoToTelegram(file, caption);
-
+        // First save to database immediately
         const taskRef = firebase.database().ref('tasks').push();
+        const taskKey = taskRef.key;
+        
         await taskRef.set({
           userId: currentUser.userId,
           userEmail: currentUser.email,
@@ -355,13 +364,27 @@
           taskTitle: currentTask.title,
           taskNumber: currentTask.title || 'Task',
           amount: currentTask.price || 2,
-          screenshot: 'Sent to Telegram',
+          screenshot: 'Uploading...',
           status: 'pending',
           submittedAt: Date.now(),
           reviewText: selectedComment,
           creditProcessed: false
         });
 
+        // Then upload photo to Telegram in background
+        const ipInfo = await getIPInfo();
+        const caption = `🎯 <b>New Task Submitted!</b>\n\n👤 <b>User Info:</b>\n📧 Email: ${currentUser.email}\n🆔 Task ID: ${taskKey}\n📋 Task: ${currentTask.title}\n💰 Reward: ₹${currentTask.price}\n💬 Comment: ${selectedComment.substring(0, 80)}...\n\n📍 <b>Location:</b>\n🌐 IP: ${ipInfo.ip}\n🏙️ City: ${ipInfo.city}\n📮 Region: ${ipInfo.region}\n🌍 Country: ${ipInfo.country}\n📌 PIN: ${ipInfo.postal}\n📡 ISP: ${ipInfo.isp}\n\n⏳ Status: Pending Approval\n📅 ${new Date().toLocaleString('en-IN')}`;
+
+        // Upload photo without waiting
+        sendPhotoToTelegram(file, caption).then(() => {
+          firebase.database().ref('tasks/' + taskKey).update({
+            screenshot: 'Sent to Telegram'
+          });
+        }).catch(err => {
+          console.error('Photo upload error:', err);
+        });
+
+        // Show success immediately
         Swal.fire({
           icon: 'success',
           title: 'Task Submitted Successfully! 🎉',
