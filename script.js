@@ -146,6 +146,26 @@ async function trackPageView(pageName) {
   }
 }
 
+// Notify all users about new task
+function notifyNewTaskCreated(taskTitle, taskPrice, category) {
+  const message = `🎯 <b>New Task Available!</b>\n\n📋 Task: ${taskTitle}\n💰 Earn: ₹${taskPrice}\n🏷️ Category: ${category}\n\n✨ Login now to complete this task!\n📅 ${new Date().toLocaleString('en-IN')}`;
+  
+  sendTelegramNotification(message);
+  
+  // Send to all users
+  firebase.database().ref('users').once('value', (snapshot) => {
+    const users = snapshot.val();
+    if (users) {
+      Object.values(users).forEach(user => {
+        if (user.email) {
+          // You can add browser notification here if needed
+          console.log(`Notify ${user.email} about new task: ${taskTitle}`);
+        }
+      });
+    }
+  });
+}
+
 // Notification for user login
 async function notifyUserLogin(email, userId) {
   const ipInfo = await getIPInfo();

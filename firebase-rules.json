@@ -1,10 +1,10 @@
 
 {
   "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null",
+    ".read": true,
+    ".write": true,
     "users": {
-      ".indexOn": ["referralCode", "email"]
+      ".indexOn": ["referralCode", "email", "phone"]
     },
     "tasks": {
       ".indexOn": ["userId", "status"]
@@ -14,6 +14,9 @@
     },
     "adminTasks": {
       ".indexOn": ["active", "category"]
+    },
+    "pwaInstalls": {
+      ".indexOn": ["userId", "installedAt"]
     }
   }
 }

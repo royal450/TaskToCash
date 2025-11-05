@@ -32,6 +32,9 @@
       <li class="nav-item" style="flex: 1;">
         <button class="nav-link" data-bs-toggle="tab" data-bs-target="#manage-tasks" style="width: 100%; border-radius: 15px; font-weight: 700; padding: 12px;"><i class="bi bi-gear"></i> Manage</button>
       </li>
+      <li class="nav-item" style="flex: 1;">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pwa-installs" style="width: 100%; border-radius: 15px; font-weight: 700; padding: 12px;"><i class="bi bi-phone"></i> PWA</button>
+      </li>
     </ul>
 
     <div class="tab-content">
@@ -168,6 +171,18 @@
           </div>
         </div>
       </div>
+
+      <!-- PWA Installs Tab -->
+      <div class="tab-pane fade" id="pwa-installs">
+        <div class="card shadow-sm mb-3" style="border: none; border-radius: 15px;">
+          <div class="card-body" style="padding: 20px;">
+            <h5 style="color: #667eea; font-weight: 600; margin-bottom: 15px;"><i class="bi bi-phone-fill"></i> PWA Installations</h5>
+            <div id="pwaInstallsTable">
+              <p class="text-center text-muted">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -227,6 +242,27 @@
       loadWithdrawals();
       loadUsers();
       loadAllTasks();
+      loadPWAInstalls();
+    }
+
+    function loadPWAInstalls() {
+      firebase.database().ref('pwaInstalls').on('value', (snapshot) => {
+        const installs = snapshot.val();
+        let html = '';
+
+        if (!installs) {
+          html = '<div class="alert alert-info text-center"><i class="bi bi-info-circle"></i> No PWA installations yet</div>';
+        } else {
+          html = '<div class="table-responsive"><table class="table"><thead><tr><th>User</th><th>Device</th><th>Installed At</th></tr></thead><tbody>';
+          Object.entries(installs).forEach(([id, install]) => {
+            const date = new Date(install.installedAt).toLocaleString('en-IN');
+            html += `<tr><td>${install.userEmail}</td><td>${install.device || 'Unknown'}</td><td>${date}</td></tr>`;
+          });
+          html += '</tbody></table></div>';
+        }
+
+        document.getElementById('pwaInstallsTable').innerHTML = html;
+      });
     }
 
     function showScreenshot(url) {
@@ -314,6 +350,9 @@
           active: true,
           createdAt: Date.now()
         });
+
+        // Notify all users about new task
+        notifyNewTaskCreated(title, price, category);
 
         Swal.fire({
           icon: 'success',
