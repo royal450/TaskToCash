@@ -11,21 +11,38 @@ const urlsToCache = [
   '/profile.html',
   '/style.css',
   '/script.js',
-  '/custom-auth.js',
-  '/manifest.json'
+  '/custom-auth.js'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+      .then((cache) => {
+        return cache.addAll(urlsToCache).catch((error) => {
+          console.error('Cache addAll failed:', error);
+          return Promise.resolve();
+        });
+      })
   );
+  self.skipWaiting();
 });
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => response || fetch(event.request))
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.status === 200) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request)
+          .then((response) => response || caches.match('/index.html'));
+      })
   );
 });
 
@@ -41,4 +58,5 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  self.clients.claim();
 });

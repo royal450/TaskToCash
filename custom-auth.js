@@ -19,15 +19,31 @@ class CustomAuth {
   }
 
   loadUserFromStorage() {
-    const userStr = localStorage.getItem('currentUser');
-    if (userStr) {
-      this.currentUser = JSON.parse(userStr);
+    try {
+      const userStr = localStorage.getItem('currentUser');
+      if (userStr) {
+        this.currentUser = JSON.parse(userStr);
+      }
+    } catch (error) {
+      console.error('Error loading user:', error);
+      localStorage.removeItem('currentUser');
+      this.currentUser = null;
     }
   }
 
   saveUserToStorage(user) {
-    this.currentUser = user;
-    localStorage.setItem('currentUser', JSON.stringify(user));
+    try {
+      this.currentUser = user;
+      localStorage.setItem('currentUser', JSON.stringify(user));
+    } catch (error) {
+      console.error('Error saving user:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Storage Error',
+        text: 'Please clear browser cache and try again',
+        confirmButtonColor: '#dc3545'
+      });
+    }
   }
 
   clearUserFromStorage() {

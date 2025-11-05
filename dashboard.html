@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -124,29 +123,22 @@
   <script>
     let currentUser = null;
 
-    customAuth.onAuthStateChanged(async (user) => {
+    customAuth.onAuthStateChanged((user) => {
       if (user) {
-        currentUser = user;
-        const userSnapshot = await firebase.database().ref('users/' + user.userId).once('value');
-        const userData = userSnapshot.val();
-        
-        if (userData && userData.blocked === true) {
+        try {
+          currentUser = user;
+          loadUserData(user.userId);
+          loadTaskHistory(user.userId);
+          trackPageView('Dashboard');
+        } catch (error) {
+          console.error('Dashboard error:', error);
           Swal.fire({
             icon: 'error',
-            title: 'Account Blocked',
-            text: 'Your account has been blocked. Contact support for assistance.',
-            confirmButtonColor: '#dc3545',
-            allowOutsideClick: false
-          }).then(() => {
-            customAuth.signOut();
-            window.location.href = 'index.html';
+            title: 'Error Loading Dashboard',
+            text: 'Please refresh the page',
+            confirmButtonColor: '#667eea'
           });
-          return;
         }
-        
-        loadUserData(user.userId);
-        loadTaskHistory(user.userId);
-        trackPageView('Dashboard');
       } else {
         window.location.href = 'index.html';
       }
@@ -157,13 +149,13 @@
       firebase.database().ref('users/' + userId).on('value', (snapshot) => {
         const data = snapshot.val();
         console.log('Dashboard data received:', data);
-        
+
         if (data) {
           document.getElementById('userEmail').textContent = data.email || 'User';
           document.getElementById('userId').textContent = data.userId || userId;
           document.getElementById('userBalance').textContent = data.balance || 0;
           document.getElementById('totalReferrals').textContent = data.totalReferrals || 0;
-          
+
           if (data.referralCode) {
             localStorage.setItem('userReferralCode', data.referralCode);
           }
@@ -195,7 +187,7 @@
       firebase.database().ref('tasks').orderByChild('userId').equalTo(userId).limitToLast(5).on('value', (snapshot) => {
         const tasks = snapshot.val();
         let html = '';
-        
+
         if (!tasks) {
           html = '<p class="text-center text-muted" style="padding: 20px 0;">No tasks submitted yet. Start completing tasks to earn money!</p>';
         } else {
@@ -213,7 +205,7 @@
               statusColor = '#ffc107';
               statusIcon = 'clock-fill';
             }
-            
+
             html += `
               <div class="d-flex justify-content-between align-items-center mb-3 pb-3" style="border-bottom: 1px solid #eee;">
                 <div>
@@ -229,7 +221,7 @@
             `;
           });
         }
-        
+
         document.getElementById('taskHistory').innerHTML = html;
       }, (error) => {
         console.error('Error loading task history:', error);
